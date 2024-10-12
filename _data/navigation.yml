@@ -4,9 +4,17 @@ main:
     url: /
   - title: "Archive"
     url: /categories/
+  - title: "Tags"
+    url: /tags/
+  - title: "Posts"
+    url: /year-archive/
   # - title: "Sample Posts"
   #   url: /year-archive/
   # - title: "Sample Collections"
   #   url: /collection-archive/
   # - title: "Sitemap"
   #   url: /sitemap/
+  - title: "Pages"
+    url: /page-archive/
+  - title: "Collections"
+    url: /collection-archive/
