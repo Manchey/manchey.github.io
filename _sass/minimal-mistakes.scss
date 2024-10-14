@@ -1,6 +1,11 @@
 /* Copyright comment */
 @import "minimal-mistakes/copyright";
 
+article.page {
+    float: left;
+    width: 100%;
+}
+
 /* Variables */
 @import "minimal-mistakes/variables";
 
