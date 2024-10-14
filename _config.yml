@@ -329,3 +329,4 @@ defaults:
       show_date: true
       toc: true
       toc_sticky: true
+      wide: true
