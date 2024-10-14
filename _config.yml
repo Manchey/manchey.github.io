@@ -137,6 +137,9 @@ author:
     - label: "Instagram"
       icon: "fab fa-fw fa-instagram"
       # url: "https://instagram.com/"
+    - label: "Source Code of This Page"
+      icon: "fab fa-fw fa-github"
+      url: "https://github.com/Manchey/manchey.github.io"
 
 # Site Footer
 footer:
