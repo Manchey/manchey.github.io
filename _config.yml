@@ -327,6 +327,6 @@ defaults:
       # share: true
       # related: true
       show_date: true
+      classes: wide
       toc: true
       toc_sticky: true
-      wide: true
