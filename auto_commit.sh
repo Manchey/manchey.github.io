@@ -28,7 +28,7 @@ fi
 modified_files=$(git diff --cached --name-only)
 
 # 生成具体的 commit message
-commit_message="Update: $(echo "$modified_files" | tr '\n' ', ' | sed 's/, $//')"
+commit_message="Update: $(echo "$modified_files" | tr '\n' ', ' | sed 's/,$//')"
 
 # 提交更改
 git commit -m "$commit_message" -s
