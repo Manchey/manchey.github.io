@@ -1,0 +1,6 @@
+This favicon was generated using the following font:
+
+- Font Title: Edu AU VIC WA NT Hand
+- Font Author: Copyright 2023 The VIC WA NT School Hand Australia Project Authors (https://github.com/SorkinType/VICWANTSchoolhandAustralia)
+- Font Source: https://fonts.gstatic.com/s/eduauvicwanthand/v1/C8cO4dY1tX2x0uuiUHFS4y7ERV-jfqJ6x063HfvcsxiYKifhtCJ1lKtFbYfTEUU.ttf
+- Font License: SIL Open Font License, 1.1 (http://scripts.sil.org/OFL))
