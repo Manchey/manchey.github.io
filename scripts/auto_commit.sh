@@ -2,7 +2,7 @@
 
 # 检查是否在 git 仓库中
 if [ ! -d .git ]; then
-  echo "当前目录不是一个 Git 仓库。"
+  echo "请在blog根目录下执行。"
   exit 1
 fi
 
