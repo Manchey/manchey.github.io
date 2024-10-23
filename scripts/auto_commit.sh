@@ -6,8 +6,6 @@ if [ ! -d .git ]; then
   exit 1
 fi
 
-# 移动所有_post中的图片至assets
-mv _posts/image/* assets/image
 # 替换markdown中图片的路径
 find _posts -name "*.md" -exec sed -i '' 's/(image/(https:\/\/manchey.github.io\/assets\/image/g' {} +
 
