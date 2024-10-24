@@ -1,23 +1,26 @@
 #!/bin/bash
 
-# 获取当前日期
-current_date=$(date +"%Y-%m-%d")
 
+# 读取日期
+read -p "Enter the date (leave bland for now): " current_date
 # 读取标题
 read -p "Enter the post title: " title
 # 读取摘录
 read -p "Enter the excerpt (leave blank for none): " excerpt
 # 读取分类
-read -p "Enter the categories (comma separated, leave blank for none): " categories_input
+read -p "Enter the categories (comma separated, leave blank for 'work'): " categories_input
 # 读取标签
 read -p "Enter the tags (comma separated, leave blank for default 'WIP'): " tags_input
 
+# 处理日期
+if [ -z "$date_input" ]; then
+    # 获取当前日期
+    current_date=$(date +"%Y-%m-%d")
+fi
+
 # 处理分类
 if [ -z "$categories_input" ]; then
-    categories=""
-else
-    IFS=',' read -r -a categories_array <<< "$categories_input"
-    categories=$(printf "  - %s\n" "${categories_array[@]}")
+    categories="work"
 fi
 
 # 处理标签
@@ -41,8 +44,7 @@ file_path="$posts_dir/$filename"
     echo "---"
     echo "title: $title"
     echo "excerpt: $excerpt"
-    echo "categories:"
-    echo "$categories"
+    echo "categories: $categories"
     echo "tags:"
     echo "$tags"
     echo "---"
