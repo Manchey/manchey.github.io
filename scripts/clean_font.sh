@@ -10,7 +10,7 @@ fi
 FILENAME="$1"
 
 # 使用 sed 删除所有 <font> 标签及其内容
-sed -i.bak 's/<font[^>]*>//g; s/<\/font>//g' "$FILENAME"
+sed -i 's/<font[^>]*>//g; s/<\/font>//g' "$FILENAME"
 
 echo "Cleaned $FILENAME. Backup created as $FILENAME.bak"
 
