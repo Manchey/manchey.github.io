@@ -1,8 +1,7 @@
 ---
 title: spark & mongodb
 excerpt: 
-categories:
-  - work
+categories: work
 tags:
   - spark
   - mongodb
