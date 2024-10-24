@@ -236,71 +236,13 @@ txtrst='\e[0m'    # Text Reset
 
 [https://askubuntu.com/questions/558280/changing-colour-of-text-and-background-of-terminal](https://askubuntu.com/questions/558280/changing-colour-of-text-and-background-of-terminal)
 
-
-##### bashrc color解释
+bashrc color解释
 Information as found on this page, excluding preview column:
 Sequences are composed of the Escape character (often represented by ”^[” or ”<Esc>”) followed by some other characters: ”^[FCm” (where FC is one of the numbers in the bulleted list below).
 In bash, the Esc code can be either of the following:
-1. \e
-2. \033 (octal)
-3. \x1B (hexadecimal)
-Note 1: The "\e[0m" sequence removes all attributes (formatting and colors). It can be a good idea to add it at the end of each colored text.
+<ol class="ne-ol">\e\033 (octal)\x1B (hexadecimal)</ol>Note 1: The "\e[0m" sequence removes all attributes (formatting and colors). It can be a good idea to add it at the end of each colored text.
 Note 2: Foreground and background colours may vary, depending on the terminal's configuration and not all colours are supported.
-
-##### Set/Reset
-- 0: Reset/remove all modifier, foreground and background attributes: echo -e "\e[0mNormal Text"
-- 1: Bold/Bright: echo -e "Normal \e[1mBold"
-- 2: Dim: echo -e "Normal \e[2mDim"
-- 4: Underlined: echo -e "Normal \e[4mUnderlined"
-- 5: Blink (doesn't work in most terminals except XTerm): echo -e "Normal \e[5mBlink"
-- 7: Reverse/Invert: echo -e "Normal \e[7minverted"
-- 8: Hidden (useful for sensitive info): echo -e "Normal \e[8mHidden Input"
-- 21: Reset/Remove bold/bright: echo -e "Normal \e[1mBold \e[21mNormal"
-- 22: Reset/Remove dim: echo -e "Normal \e[2mDim \e[22mNormal"
-- 24: Reset/Remove underline: echo -e "Normal \e[4mUnderlined \e[24mNormal"
-- 25: Reset/Remove blink: echo -e "Normal \e[5mBlink \e[25mNormal"
-- 27: Reset/Remove reverse/invert: echo -e "Normal \e[7minverted \e[27mNormal"
-- 28: Reset/Remove hidden: echo -e "Normal \e[8mHidden \e[28mNormal"
-
-##### Foreground
-- 39: Default (usually green, white or light gray): echo -e "Default \e[39mDefault"
-- 30: Black: echo -e "Default \e[30mBlack" (best combined with a background colour: echo -e "Default \e[30;107mBlack on white")
-- 31: Red (don't use with green background)
-- 32: Green
-- 33: Yellow
-- 34: Blue
-- 35: Magenta/Purple
-- 36: Cyan
-- 37: Light Gray
-- 90: Dark Gray
-- 91: Light Red
-- 92: Light Green
-- 93: Light Yellow
-- 94: Light Blue
-- 95: Light Magenta/Pink
-- 96: Light Cyan
-- 97: White
-
-##### Background
-- 49: Default background color (usually black or blue)
-- 40: Black
-- 41: Red
-- 42: Green
-- 43: Yellow
-- 44: Blue
-- 45: Magenta/Purple
-- 46: Cyan
-- 47: Light Gray (don't use with white foreground)
-- 100: Dark Gray (don't use with black foreground)
-- 101: Light Red
-- 102: Light Green (don't use with white foreground)
-- 103: Light Yellow (don't use with white foreground)
-- 104: Light Blue (don't use with light yellow foreground)
-- 105: Light Magenta/Pink (don't use with light foreground)
-- 106: Light Cyan (don't use with white foreground)
-- 107: White (don't use with light foreground)
-
-To set both the foreground and background colours at once, use ther form echo -e "\e[S;FG;BGm". For example: echo -e "\e[1;97;41m" (bold white foreground on red background)
+Set/Reset<ul class="ne-ul">0: Reset/remove all modifier, foreground and background attributes: echo -e "\e[0mNormal Text"1: Bold/Bright: echo -e "Normal \e[1mBold"2: Dim: echo -e "Normal \e[2mDim"4: Underlined: echo -e "Normal \e[4mUnderlined"5: Blink (doesn't work in most terminals except XTerm): echo -e "Normal \e[5mBlink"7: Reverse/Invert: echo -e "Normal \e[7minverted"8: Hidden (useful for sensitive info): echo -e "Normal \e[8mHidden Input"21: Reset/Remove bold/bright: echo -e "Normal \e[1mBold \e[21mNormal"22: Reset/Remove dim: echo -e "Normal \e[2mDim \e[22mNormal"24: Reset/Remove underline: echo -e "Normal \e[4mUnderlined \e[24mNormal"25: Reset/Remove blink: echo -e "Normal \e[5mBlink \e[25mNormal"27: Reset/Remove reverse/invert: echo -e "Normal \e[7minverted \e[27mNormal"28: Reset/Remove hidden: echo -e "Normal \e[8mHidden \e[28mNormal"</ul>Foreground<ul class="ne-ul">39: Default (usually green, white or light gray): echo -e "Default \e[39mDefault"30: Black: echo -e "Default \e[30mBlack" (best combined with a background colour: echo -e "Default \e[30;107mBlack on white")31: Red (don't use with green background)32: Green33: Yellow34: Blue35: Magenta/Purple36: Cyan37: Light Gray90: Dark Gray91: Light Red92: Light Green93: Light Yellow94: Light Blue95: Light Magenta/Pink96: Light Cyan97: White</ul>Background<ul class="ne-ul">49: Default background color (usually black or blue)40: Black41: Red42: Green43: Yellow44: Blue45: Magenta/Purple46: Cyan47: Light Gray (don't use with white foreground)100: Dark Gray (don't use with black foreground)101: Light Red102: Light Green (don't use with white foreground)103: Light Yellow (don't use with white foreground)104: Light Blue (don't use with light yellow foreground)105: Light Magenta/Pink (don't use with light foreground)106: Light Cyan (don't use with white foreground)107: White (don't use with light foreground)</ul>To set both the foreground and background colours at once, use ther form echo -e "\e[S;FG;BGm". For example: echo -e "\e[1;97;41m" (bold white foreground on red background)
 For 256 colour options, see the source page.
 
 

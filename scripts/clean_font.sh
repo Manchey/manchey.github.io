@@ -10,7 +10,18 @@ fi
 FILENAME="$1"
 
 # 使用 sed 删除所有 <font> 标签及其内容
-sed -i 's/<font[^>]*>//g; s/<\/font>//g' "$FILENAME"
+sed -i.bak 's/<font[^>]*>//g; s/<\/font>//g' "$FILENAME"
 
-echo "Cleaned $FILENAME. Backup created as $FILENAME.bak"
+# 使用 sed 删除所有 <span> 标签及其内容
+sed -i.bak 's/<span[^>]*>//g; s/<\/span>//g' "$FILENAME"
+sed -i.bak 's/<details[^>]*>//g; s/<\/details>//g' "$FILENAME"
+sed -i.bak 's/<summary[^>]*>//g; s/<\/summary>/\n/g' "$FILENAME"
+sed -i.bak 's/<em[^>]*>//g; s/<\/em>//g' "$FILENAME"
+sed -i.bak 's/<li[^>]*>//g; s/<\/li>//g' "$FILENAME"
+sed -i.bak 's/<p[^>]*>//g; s/<\/p>/\n/g' "$FILENAME"
+sed -i.bak 's/<a[^>]*>//g; s/<\/a>//g' "$FILENAME"
+sed -i.bak 's/<h1[^>]*>//g; s/<\/h1>//g' "$FILENAME"
+sed -i.bak 's/<ul[^>]*>/\n/g; s/<\/ul>//g' "$FILENAME"
+
+echo "Cleaned $FILENAME.
 
