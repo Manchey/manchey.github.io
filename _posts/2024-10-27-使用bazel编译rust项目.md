@@ -99,3 +99,42 @@ rust_library(
 ```
 
 # Rust call c++编译问题
+
+- rust调用c++代码，一般几种方式：cxx、autocxx、bindgen
+  - 此前用的autocxx，相对来说是最方便使用的，不需要自己手动写大量的胶水层代码
+
+- autocxx本身目前没有现成的bazel方案，但一些开源相关工作可以参考：
+  - autocxx仓库的bazel PR：https://github.com/google/autocxx/pull/1255
+  - 有一个开源库，自己做了autocxx的bazel集成：https://github.com/frc971/971-Robot-Code/blob/main/tools/build_rules/autocxx.bzl
+
+- autocxx的原理介绍：
+  - https://google.github.io/autocxx/building.html
+
+  - 重点是通过autocxx-gen工具，生成对应的cpp/rs胶水层代码并编译。
+  - 之前的build.rs脚本中autocxx提供的函数其实就是封装了这一过程。
+
+## 生成过程
+
+1. 先把依赖的几个proto编译一下，把头文件生成出来。
+
+2. 然后执行autocxx-gen
+
+```bash
+autocxx-gen ./perf_analysis/deep_os_tool/deep_os_monitor/src/tracelog/cpp_to_rust_interface/cpp_interface.rs \
+            --outdir ./test-output/ \
+            --gen-cpp \
+            --gen-rs-include \
+            --inc ./ \
+            --inc ./bazel-bin \
+```
+
+
+- 参数解释：
+  - cpp_interface.rs：调用了c++的rust代码
+  - --outdir：输出文件夹
+  - --gen-cpp：指定生成c++胶水层代码
+  - --gen-rs-include：指定生成rust胶水层代码
+  - --inc：按需指定依赖的各个头文件路径
+    - ./bazel-bin：church的几个protobuf生成的头文件
+    - ./bazel-bin/external/common/_virtual_includes/module_event_proto/：common中的protobuf头文件
+
