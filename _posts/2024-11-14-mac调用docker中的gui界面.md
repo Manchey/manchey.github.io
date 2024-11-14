@@ -1,5 +1,5 @@
 ---
-title: 调用docker中的GUI界面
+title: mac调用docker中的GUI界面
 excerpt: 
 categories: work
 ---
