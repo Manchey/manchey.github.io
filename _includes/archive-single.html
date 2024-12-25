@@ -32,6 +32,13 @@
           {{ post.categories | join: ", " }}
         </span>
       {% endif %}
+      {% if post.tags[0] %}
+        <span class="page__meta-sep"></span>
+        <span class="page__meta-tags">
+          <i class="fas fa-fw fa-tags" aria-hidden="true"></i>
+          {{ post.tags | join: ", " }}
+        </span>
+      {% endif %}
     </p>
   </article>
 </div>
