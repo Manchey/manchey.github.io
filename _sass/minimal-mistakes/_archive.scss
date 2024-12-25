@@ -20,14 +20,36 @@
 
 .archive__item {
   position: relative;
-
-  a {
-    position: relative;
-    z-index: 10;
+  margin-bottom: 1em;
+  
+  .archive__item-title {
+    margin-top: 0;
+    margin-bottom: 0.25em;
+    font-size: 1em;
+    
+    a {
+      text-decoration: none;
+      &:hover {
+        text-decoration: underline;
+      }
+    }
   }
-
-  a[rel="permalink"] {
-    position: static;
+  
+  .archive__item-meta {
+    font-size: 0.8em;
+    color: $muted-text-color;
+    margin: 0;
+    
+    .page__meta-sep {
+      margin: 0 0.5em;
+      &:before {
+        content: "\2022";
+      }
+    }
+    
+    i {
+      margin-right: 0.2em;
+    }
   }
 }
 
@@ -122,9 +144,11 @@
    ========================================================================== */
 
 .list__item {
-  .page__meta {
-    margin: 0 0 4px;
-    font-size: 0.6em;
+  padding: 0.5em 0;
+  border-bottom: 1px solid $border-color;
+  
+  &:last-child {
+    border-bottom: none;
   }
 }
 
