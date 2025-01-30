@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="
+  手动配置方法
+  #
+
+
+
+完全关闭 Cursor
+
+
+找到配置文件位置：
+
+Windows: %APPDATA%\Cursor\User\globalStorage\storage.json
+macOS: ~/Library/Application\ Support/Cursor/User/globalStorage/storage.json
+Linux: ~/.config/Cursor/User/globalStorage/storage.json
+
+
+
+备份 storage.json
+
+
+编辑 storage.json 并更新以下字段（使用新的随机UUID）：
+
+
+{
+  &#34;telemetry.machineId&#34;: &#34;生成新的uuid&#34;,
+  &#34;telemetry.macMachineId&#34;: &#34;生成新的uuid&#34;,
+  &#34;telemetry.devDeviceId&#34;: &#34;生成新的uuid&#34;,
+  &#34;telemetry.sqmId&#34;: &#34;生成新的uuid&#34;,
+  &#34;lastModified&#34;: &#34;2024-01-01T00:00:00.000Z&#34;,
+  &#34;version&#34;: &#34;1.0.1&#34;
+}
+
+保存文件并重启 Cursor
+">
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#343a40">
+<meta name="color-scheme" content="light dark"><meta property="og:url" content="http://localhost:1313/posts/1/01/cursor%E4%BF%AEmachine-id/">
+  <meta property="og:site_name" content="Manchey Blog">
+  <meta property="og:title" content="cursor修machine id">
+  <meta property="og:description" content="手动配置方法 # 完全关闭 Cursor
+找到配置文件位置：
+Windows: %APPDATA%\Cursor\User\globalStorage\storage.json macOS: ~/Library/Application\ Support/Cursor/User/globalStorage/storage.json Linux: ~/.config/Cursor/User/globalStorage/storage.json 备份 storage.json
+编辑 storage.json 并更新以下字段（使用新的随机UUID）：
+{ &#34;telemetry.machineId&#34;: &#34;生成新的uuid&#34;, &#34;telemetry.macMachineId&#34;: &#34;生成新的uuid&#34;, &#34;telemetry.devDeviceId&#34;: &#34;生成新的uuid&#34;, &#34;telemetry.sqmId&#34;: &#34;生成新的uuid&#34;, &#34;lastModified&#34;: &#34;2024-01-01T00:00:00.000Z&#34;, &#34;version&#34;: &#34;1.0.1&#34; } 保存文件并重启 Cursor">
+  <meta property="og:locale" content="en_us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="post">
+    <meta property="article:tag" content="Blog">
+<title>cursor修machine id | Manchey Blog</title>
+<link rel="icon" href="http://localhost:1313/logo.png" >
+<link rel="manifest" href="http://localhost:1313/manifest.json">
+<link rel="canonical" href="http://localhost:1313/posts/1/01/cursor%E4%BF%AEmachine-id/">
+<link rel="stylesheet" href="http://localhost:1313/book.min.2d11051f9bbf9eb3c1e80b2b7a60b21379d1b88bdcc5a0c2b268ec9357d72f50.css" integrity="sha256-LREFH5u/nrPB6AsremCyE3nRuIvcxaDCsmjsk1fXL1A=" crossorigin="anonymous">
+  <script defer src="http://localhost:1313/fuse.min.js"></script>
+  <script defer src="http://localhost:1313/en.search.min.202c599dd138229b73a70f5225b51f437018d651488c03ce5fe7f358c1e67f0d.js" integrity="sha256-ICxZndE4Iptzpw9SJbUfQ3AY1lFIjAPOX&#43;fzWMHmfw0=" crossorigin="anonymous"></script>
+<!--
+Made with Book Theme
+https://github.com/alex-shpak/hugo-book
+-->
+  
+</head>
+<body dir="ltr">
+  <input type="checkbox" class="hidden toggle" id="menu-control" />
+  <input type="checkbox" class="hidden toggle" id="toc-control" />
+  <main class="container flex">
+    <aside class="book-menu">
+      <div class="book-menu-content">
+        
+  <nav>
+<h2 class="book-brand">
+  <a class="flex align-center" href="http://localhost:1313/"><img src="http://localhost:1313/logo.png" alt="Logo" class="book-icon" /><span>Manchey Blog</span>
+  </a>
+</h2>
+
+
+<div class="book-search hidden">
+  <input type="text" id="book-search-input" placeholder="Search" aria-label="Search" maxlength="64" data-hotkeys="s/" />
+  <div class="book-search-spinner hidden"></div>
+  <ul id="book-search-results"></ul>
+</div>
+<script>document.querySelector(".book-search").classList.remove("hidden")</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+<ul>
+  
+  <li>
+    <a href="http://localhost:1313/"  >
+        Home
+      </a>
+  </li>
+  
+  <li>
+    <a href="http://localhost:1313/post/"  >
+        Blog
+      </a>
+  </li>
+  
+  <li>
+    <a href="http://localhost:1313/about/"  >
+        About
+      </a>
+  </li>
+  
+  <li>
+    <a href="https://github.com/Manchey/manchey.github.io"  target="_blank" rel="noopener">
+        Github
+      </a>
+  </li>
+  
+</ul>
+
+
+
+
+
+
+</nav>
+
+
+
+
+  <script>(function(){var e=document.querySelector("aside .book-menu-content");addEventListener("beforeunload",function(){localStorage.setItem("menu.scrollTop",e.scrollTop)}),e.scrollTop=localStorage.getItem("menu.scrollTop")})()</script>
+
+
+ 
+      </div>
+    </aside>
+
+    <div class="book-page">
+      <header class="book-header">
+        
+  <div class="flex align-center justify-between">
+  <label for="menu-control">
+    <img src="http://localhost:1313/svg/menu.svg" class="book-icon" alt="Menu" />
+  </label>
+
+  <h3>cursor修machine id</h3>
+
+  <label for="toc-control">
+    
+    <img src="http://localhost:1313/svg/toc.svg" class="book-icon" alt="Table of Contents" />
+    
+  </label>
+</div>
+
+
+  
+  <aside class="hidden clearfix">
+    
+  
+<nav id="TableOfContents"></nav>
+
+
+
+  </aside>
+  
+ 
+      </header>
+
+      
+      
+  <article class="markdown book-article"><h1 id="手动配置方法">
+  手动配置方法
+  <a class="anchor" href="#%e6%89%8b%e5%8a%a8%e9%85%8d%e7%bd%ae%e6%96%b9%e6%b3%95">#</a>
+</h1>
+<ol>
+<li>
+<p>完全关闭 Cursor</p>
+</li>
+<li>
+<p>找到配置文件位置：</p>
+<ul>
+<li>Windows: %APPDATA%\Cursor\User\globalStorage\storage.json</li>
+<li>macOS: ~/Library/Application\ Support/Cursor/User/globalStorage/storage.json</li>
+<li>Linux: ~/.config/Cursor/User/globalStorage/storage.json</li>
+</ul>
+</li>
+<li>
+<p>备份 storage.json</p>
+</li>
+<li>
+<p>编辑 storage.json 并更新以下字段（使用新的随机UUID）：</p>
+</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;telemetry.machineId&#34;</span>: <span style="color:#e6db74">&#34;生成新的uuid&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;telemetry.macMachineId&#34;</span>: <span style="color:#e6db74">&#34;生成新的uuid&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;telemetry.devDeviceId&#34;</span>: <span style="color:#e6db74">&#34;生成新的uuid&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;telemetry.sqmId&#34;</span>: <span style="color:#e6db74">&#34;生成新的uuid&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;lastModified&#34;</span>: <span style="color:#e6db74">&#34;2024-01-01T00:00:00.000Z&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;version&#34;</span>: <span style="color:#e6db74">&#34;1.0.1&#34;</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><ol start="5">
+<li>保存文件并重启 Cursor</li>
+</ol>
+</article>
+ 
+      
+
+      <footer class="book-footer">
+        
+  <div class="flex flex-wrap justify-between">
+
+
+
+
+
+</div>
+
+
+
+  <script>(function(){function e(e){const t=window.getSelection(),n=document.createRange();n.selectNodeContents(e),t.removeAllRanges(),t.addRange(n)}document.querySelectorAll("pre code").forEach(t=>{t.addEventListener("click",function(){if(window.getSelection().toString())return;e(t.parentElement),navigator.clipboard&&navigator.clipboard.writeText(t.parentElement.textContent)})})})()</script>
+
+
+ 
+        
+      </footer>
+
+      
+  
+  <div class="book-comments">
+
+</div>
+  
+ 
+
+      <label for="menu-control" class="hidden book-menu-overlay"></label>
+    </div>
+
+    
+    <aside class="book-toc">
+      <div class="book-toc-content">
+        
+  
+<nav id="TableOfContents"></nav>
+
+
+ 
+      </div>
+    </aside>
+    
+  </main>
+
+  
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="
+  CGraph调研
+  #
+
+repo：https://github.com/ChunelFeng/CGraph
+
+  功能
+  #
+
+
+  建立依赖图关系：GPipeline、GNode（T00/T01）
+  #
+
+
+一条 pipeline 是从头执行到尾的，其实是 graph 的概念，没有流水线的功能
+
+
+
+1
+
+
+status &#43;= pipeline-&gt;registerGElement&lt;MyNode2&gt;(&amp;b, {a}, &#34;nodeB&#34;);    // 将名为nodeB，依赖a执行的node信息，注册入pipeline中
+
+
+
+  子图：Cluster / Region：类似 subgraph，互相可嵌套（T02/T03/T04）
+  #
+
+
+cluster：subgraph 中的多个节点串行执行
+
+
+http://www.chunel.cn/archives/cgraph-run-introduce
+
+
+
+这个解释感觉有点奇怪，D/F 未能并行执行是实现机制的问题，感觉不需要引入新的概念来解决。
+
+
+
+region：可以是 DAG 图
+
+
+
+1
+2
+3
+4
+5
+
+
+b_cluster = pipeline-&gt;createGGroup&lt;GCluster&gt;({
+	 pipeline-&gt;createGNode&lt;MyNode1&gt;(GNodeInfo(&#34;nodeB1&#34;, 1)),    // 创建名为nodeB1的node信息，并将其放入b_cluster中
+	 pipeline-&gt;createGNode&lt;MyNode1&gt;(GNodeInfo(&#34;nodeB2&#34;, 3)),    // 创建名为nodeB2且自循环3次的node信息，并将其放入b_cluster中
+	 pipeline-&gt;createGNode&lt;MyNode2&gt;(GNodeInfo(&#34;nodeB3&#34;, 1))
+});    // 创建cluster信息，包含了三个node信息
+
+
+
+
+1
+
+
+    b_region = pipeline-&gt;createGGroup&lt;GRegion&gt;({b1, b2, b3, b4});    // 将 b1、b2、b3、b4 注册入b_region中
+
+
+
+  参数传递：param (T05)
+  #
+
+相当于是一个 map，同一个 pipeline 中各个节点共享的全局参数。">
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#343a40">
+<meta name="color-scheme" content="light dark"><meta property="og:url" content="http://localhost:1313/posts/2024/12/cgraph%E8%B0%83%E7%A0%94/">
+  <meta property="og:site_name" content="Manchey Blog">
+  <meta property="og:title" content="CGraph调研">
+  <meta property="og:description" content="CGraph调研 # repo：https://github.com/ChunelFeng/CGraph
+功能 # 建立依赖图关系：GPipeline、GNode（T00/T01） # 一条 pipeline 是从头执行到尾的，其实是 graph 的概念，没有流水线的功能 1 status &#43;= pipeline-&gt;registerGElement&lt;MyNode2&gt;(&amp;b, {a}, &#34;nodeB&#34;); // 将名为nodeB，依赖a执行的node信息，注册入pipeline中 子图：Cluster / Region：类似 subgraph，互相可嵌套（T02/T03/T04） # cluster：subgraph 中的多个节点串行执行 http://www.chunel.cn/archives/cgraph-run-introduce 这个解释感觉有点奇怪，D/F 未能并行执行是实现机制的问题，感觉不需要引入新的概念来解决。 region：可以是 DAG 图 1 2 3 4 5 b_cluster = pipeline-&gt;createGGroup&lt;GCluster&gt;({ pipeline-&gt;createGNode&lt;MyNode1&gt;(GNodeInfo(&#34;nodeB1&#34;, 1)), // 创建名为nodeB1的node信息，并将其放入b_cluster中 pipeline-&gt;createGNode&lt;MyNode1&gt;(GNodeInfo(&#34;nodeB2&#34;, 3)), // 创建名为nodeB2且自循环3次的node信息，并将其放入b_cluster中 pipeline-&gt;createGNode&lt;MyNode2&gt;(GNodeInfo(&#34;nodeB3&#34;, 1)) }); // 创建cluster信息，包含了三个node信息 1 b_region = pipeline-&gt;createGGroup&lt;GRegion&gt;({b1, b2, b3, b4}); // 将 b1、b2、b3、b4 注册入b_region中 参数传递：param (T05) # 相当于是一个 map，同一个 pipeline 中各个节点共享的全局参数。">
+  <meta property="og:locale" content="en_us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="post">
+    <meta property="article:published_time" content="2024-12-25T00:00:00+00:00">
+    <meta property="article:modified_time" content="2024-12-25T00:00:00+00:00">
+    <meta property="article:tag" content="Tech/Cpp/Scheduler/Cgraph">
+    <meta property="article:tag" content="Blog">
+<title>CGraph调研 | Manchey Blog</title>
+<link rel="icon" href="http://localhost:1313/logo.png" >
+<link rel="manifest" href="http://localhost:1313/manifest.json">
+<link rel="canonical" href="http://localhost:1313/posts/2024/12/cgraph%E8%B0%83%E7%A0%94/">
+<link rel="stylesheet" href="http://localhost:1313/book.min.2d11051f9bbf9eb3c1e80b2b7a60b21379d1b88bdcc5a0c2b268ec9357d72f50.css" integrity="sha256-LREFH5u/nrPB6AsremCyE3nRuIvcxaDCsmjsk1fXL1A=" crossorigin="anonymous">
+  <script defer src="http://localhost:1313/fuse.min.js"></script>
+  <script defer src="http://localhost:1313/en.search.min.f5eb7e06e94822c203a80b9054e9a528440f25b32e71d6d1955036cdde189092.js" integrity="sha256-9et&#43;BulIIsIDqAuQVOmlKEQPJbMucdbRlVA2zd4YkJI=" crossorigin="anonymous"></script>
+
+
+<!--
+Made with Book Theme
+https://github.com/alex-shpak/hugo-book
+-->
+  
+</head>
+<body dir="ltr">
+  <input type="checkbox" class="hidden toggle" id="menu-control" />
+  <input type="checkbox" class="hidden toggle" id="toc-control" />
+  <main class="container flex">
+    <aside class="book-menu">
+      <div class="book-menu-content">
+        
+  <nav>
+<h2 class="book-brand">
+  <a class="flex align-center" href="http://localhost:1313/"><img src="http://localhost:1313/logo.png" alt="Logo" class="book-icon" /><span>Manchey Blog</span>
+  </a>
+</h2>
+
+
+<div class="book-search hidden">
+  <input type="text" id="book-search-input" placeholder="Search" aria-label="Search" maxlength="64" data-hotkeys="s/" />
+  <div class="book-search-spinner hidden"></div>
+  <ul id="book-search-results"></ul>
+</div>
+<script>document.querySelector(".book-search").classList.remove("hidden")</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+<ul>
+  
+  <li>
+    <a href="http://localhost:1313/"  >
+        Home
+      </a>
+  </li>
+  
+  <li>
+    <a href="http://localhost:1313/post/"  >
+        Blog
+      </a>
+  </li>
+  
+  <li>
+    <a href="http://localhost:1313/diary/"  >
+        Diary
+      </a>
+  </li>
+  
+  <li>
+    <a href="http://localhost:1313/about/"  >
+        About
+      </a>
+  </li>
+  
+  <li>
+    <a href="https://github.com/Manchey/manchey.github.io"  target="_blank" rel="noopener">
+        Github
+      </a>
+  </li>
+  
+</ul>
+
+
+
+
+
+
+</nav>
+
+
+
+
+  <script>(function(){var e=document.querySelector("aside .book-menu-content");addEventListener("beforeunload",function(){localStorage.setItem("menu.scrollTop",e.scrollTop)}),e.scrollTop=localStorage.getItem("menu.scrollTop")})()</script>
+
+
+ 
+      </div>
+    </aside>
+
+    <div class="book-page">
+      <header class="book-header">
+        
+  <div class="flex align-center justify-between">
+  <label for="menu-control">
+    <img src="http://localhost:1313/svg/menu.svg" class="book-icon" alt="Menu" />
+  </label>
+
+  <h3>CGraph调研</h3>
+
+  <label for="toc-control">
+    
+    <img src="http://localhost:1313/svg/toc.svg" class="book-icon" alt="Table of Contents" />
+    
+  </label>
+</div>
+
+
+  
+  <aside class="hidden clearfix">
+    
+  
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#功能">功能</a>
+      <ul>
+        <li><a href="#建立依赖图关系gpipelinegnodet00t01">建立依赖图关系：GPipeline、GNode（T00/T01）</a></li>
+        <li><a href="#子图cluster--region类似-subgraph互相可嵌套t02t03t04">子图：Cluster / Region：类似 subgraph，互相可嵌套（T02/T03/T04）</a></li>
+        <li><a href="#参数传递param-t05">参数传递：param (T05)</a></li>
+        <li><a href="#条件选择condition-t06">条件选择：Condition （T06）</a></li>
+        <li><a href="#多条-pipeline-t07">多条 pipeline (T07)</a></li>
+        <li><a href="#有初始化参数的-gnode-t08">有初始化参数的 GNode (T08)</a></li>
+        <li><a href="#切面-gaspect-t09t10">切面 GAspect ：（T09/T10）</a></li>
+        <li><a href="#singleton-节点t11">Singleton 节点（T11）</a></li>
+        <li><a href="#cfunction-节点t12">CFunction 节点（T12）</a></li>
+        <li><a href="#定时任务daemont13">定时任务：Daemon（T13）</a></li>
+        <li><a href="#hold-机制t14">Hold 机制：（T14）</a></li>
+        <li><a href="#参数eparamt15">参数：EParam（T15）</a></li>
+        <li><a href="#消息传递messaget16t17">消息传递：Message（T16、T17）</a></li>
+        <li><a href="#事件eventt18">事件：Event（T18）</a></li>
+        <li><a href="#执行控制t19t20">执行控制（T19、T20）</a></li>
+        <li><a href="#条件选择multiconditiont21">条件选择：MultiCondition（T21）</a></li>
+        <li><a href="#超时timeoutt22">超时：Timeout（T22）</a></li>
+        <li><a href="#some任意一个完成即可触发后续任务t23">Some：任意一个完成，即可触发后续任务（T23）</a></li>
+        <li><a href="#fence用来等待异步任务结束t24">Fence：用来等待异步任务结束（T24）</a></li>
+        <li><a href="#coordinator运行过程中动态调整线程数t25">Coordinator：运行过程中，动态调整线程数（T25）</a></li>
+        <li><a href="#mutable运行过程中动态调整依赖关系t26">Mutable：运行过程中，动态调整依赖关系（T26）</a></li>
+        <li><a href="#trim删除不必要的依赖关系t27">trim()：删除不必要的依赖关系（T27）</a></li>
+        <li><a href="#线程池tu01">线程池（TU01）</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+
+
+
+  </aside>
+  
+ 
+      </header>
+
+      
+      
+  <article class="markdown book-article"><h1 id="cgraph调研">
+  CGraph调研
+  <a class="anchor" href="#cgraph%e8%b0%83%e7%a0%94">#</a>
+</h1>
+<p>repo：https://github.com/ChunelFeng/CGraph</p>
+<h2 id="功能">
+  功能
+  <a class="anchor" href="#%e5%8a%9f%e8%83%bd">#</a>
+</h2>
+<h3 id="建立依赖图关系gpipelinegnodet00t01">
+  建立依赖图关系：GPipeline、GNode（T00/T01）
+  <a class="anchor" href="#%e5%bb%ba%e7%ab%8b%e4%be%9d%e8%b5%96%e5%9b%be%e5%85%b3%e7%b3%bbgpipelinegnodet00t01">#</a>
+</h3>
+<ul>
+<li>一条 pipeline 是从头执行到尾的，其实是 graph 的概念，没有流水线的功能</li>
+</ul>
+<div class="highlight"><div style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-0-1"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-0-1">1</a>
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-C++" data-lang="C++"><span style="display:flex;"><span>status += pipeline-&gt;registerGElement&lt;MyNode2&gt;(&amp;b, {a}, <span style="color:#cd5555">&#34;nodeB&#34;</span>);    <span style="color:#228b22">// 将名为nodeB，依赖a执行的node信息，注册入pipeline中
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="子图cluster--region类似-subgraph互相可嵌套t02t03t04">
+  子图：Cluster / Region：类似 subgraph，互相可嵌套（T02/T03/T04）
+  <a class="anchor" href="#%e5%ad%90%e5%9b%becluster--region%e7%b1%bb%e4%bc%bc-subgraph%e4%ba%92%e7%9b%b8%e5%8f%af%e5%b5%8c%e5%a5%97t02t03t04">#</a>
+</h3>
+<ul>
+<li>cluster：subgraph 中的多个节点串行执行</li>
+</ul>
+<blockquote>
+<p><a href="http://www.chunel.cn/archives/cgraph-run-introduce">http://www.chunel.cn/archives/cgraph-run-introduce</a>
+<img src="assets/Pasted%20image%2020241225154105.png" alt="|434" />
+<img src="assets/Pasted%20image%2020241225154201.png" alt="|588" /></p>
+<ul>
+<li>这个解释感觉有点奇怪，D/F 未能并行执行是实现机制的问题，感觉不需要引入新的概念来解决。</li>
+</ul>
+</blockquote>
+<ul>
+<li>region：可以是 DAG 图</li>
+</ul>
+<div class="highlight"><div style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-1-1"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-1-1">1</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-1-2"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-1-2">2</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-1-3"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-1-3">3</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-1-4"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-1-4">4</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-1-5"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-1-5">5</a>
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-C++" data-lang="C++"><span style="display:flex;"><span>b_cluster = pipeline-&gt;createGGroup&lt;GCluster&gt;({
+</span></span><span style="display:flex;"><span>	 pipeline-&gt;createGNode&lt;MyNode1&gt;(GNodeInfo(<span style="color:#cd5555">&#34;nodeB1&#34;</span>, <span style="color:#b452cd">1</span>)),    <span style="color:#228b22">// 创建名为nodeB1的node信息，并将其放入b_cluster中
+</span></span></span><span style="display:flex;"><span><span style="color:#228b22"></span>	 pipeline-&gt;createGNode&lt;MyNode1&gt;(GNodeInfo(<span style="color:#cd5555">&#34;nodeB2&#34;</span>, <span style="color:#b452cd">3</span>)),    <span style="color:#228b22">// 创建名为nodeB2且自循环3次的node信息，并将其放入b_cluster中
+</span></span></span><span style="display:flex;"><span><span style="color:#228b22"></span>	 pipeline-&gt;createGNode&lt;MyNode2&gt;(GNodeInfo(<span style="color:#cd5555">&#34;nodeB3&#34;</span>, <span style="color:#b452cd">1</span>))
+</span></span><span style="display:flex;"><span>});    <span style="color:#228b22">// 创建cluster信息，包含了三个node信息
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-2-1"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-2-1">1</a>
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-C++" data-lang="C++"><span style="display:flex;"><span>    b_region = pipeline-&gt;createGGroup&lt;GRegion&gt;({b1, b2, b3, b4});    <span style="color:#228b22">// 将 b1、b2、b3、b4 注册入b_region中
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="参数传递param-t05">
+  参数传递：param (T05)
+  <a class="anchor" href="#%e5%8f%82%e6%95%b0%e4%bc%a0%e9%80%92param-t05">#</a>
+</h3>
+<p>相当于是一个 map，同一个 pipeline 中各个节点共享的全局参数。</p>
+<div class="highlight"><div style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-1"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-1">1</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-2"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-2">2</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-3"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-3">3</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-4"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-4">4</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-5"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-5">5</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-6"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-6">6</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-7"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-7">7</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-8"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-8">8</a>
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-C++" data-lang="C++"><span style="display:flex;"><span><span style="color:#228b22">// 创建
+</span></span></span><span style="display:flex;"><span><span style="color:#228b22"></span>status = CGRAPH_CREATE_GPARAM(MyParam, <span style="color:#cd5555">&#34;param1&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#228b22">// 读取
+</span></span></span><span style="display:flex;"><span><span style="color:#228b22"></span><span style="color:#8b008b;font-weight:bold">auto</span>* myParam = CGRAPH_GET_GPARAM_WITH_NO_EMPTY(MyParam, <span style="color:#cd5555">&#34;param1&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#228b22">// 写入
+</span></span></span><span style="display:flex;"><span><span style="color:#228b22"></span>CGRAPH_PARAM_WRITE_CODE_BLOCK(myParam)
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="条件选择condition-t06">
+  条件选择：Condition （T06）
+  <a class="anchor" href="#%e6%9d%a1%e4%bb%b6%e9%80%89%e6%8b%a9condition-t06">#</a>
+</h3>
+<p>根据 <code>choose</code> 返回值，来决定下一步运行哪一个节点。</p>
+<p>choose 函数里，可以通过 param 来获取到外界信息，做一些判断。</p>
+<div class="highlight"><div style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-4-1"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-4-1">1</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-4-2"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-4-2">2</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-4-3"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-4-3">3</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-4-4"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-4-4">4</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-4-5"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-4-5">5</a>
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-C++" data-lang="C++"><span style="display:flex;"><span>b_condition = pipeline-&gt;createGGroup&lt;MyCondition&gt;({
+</span></span><span style="display:flex;"><span>	pipeline-&gt;createGNode&lt;MyNode1&gt;(GNodeInfo(<span style="color:#cd5555">&#34;conditionNodeB0&#34;</span>, <span style="color:#b452cd">1</span>)),
+</span></span><span style="display:flex;"><span>	pipeline-&gt;createGNode&lt;MyNode2&gt;(GNodeInfo(<span style="color:#cd5555">&#34;conditionNodeB1&#34;</span>, <span style="color:#b452cd">1</span>)),
+</span></span><span style="display:flex;"><span>	pipeline-&gt;createGNode&lt;MyNode1&gt;(GNodeInfo(<span style="color:#cd5555">&#34;conditionNodeB2&#34;</span>, <span style="color:#b452cd">1</span>))
+</span></span><span style="display:flex;"><span>});    <span style="color:#228b22">// 生成 b_condition。执行的时候，根据choose()的返回值，在B0,B1,B2中选择一个执行
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="多条-pipeline-t07">
+  多条 pipeline (T07)
+  <a class="anchor" href="#%e5%a4%9a%e6%9d%a1-pipeline-t07">#</a>
+</h3>
+<ul>
+<li>手动指定线程池</li>
+</ul>
+<div class="highlight"><div style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-5-1"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-5-1"> 1</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-5-2"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-5-2"> 2</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-5-3"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-5-3"> 3</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-5-4"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-5-4"> 4</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-5-5"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-5-5"> 5</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-5-6"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-5-6"> 6</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-5-7"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-5-7"> 7</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-5-8"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-5-8"> 8</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-5-9"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-5-9"> 9</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-5-10"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-5-10">10</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-5-11"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-5-11">11</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-5-12"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-5-12">12</a>
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-C++" data-lang="C++"><span style="display:flex;"><span><span style="color:#228b22">// 创建线程池
+</span></span></span><span style="display:flex;"><span><span style="color:#228b22"></span>UThreadPoolConfig config;
+</span></span><span style="display:flex;"><span>config.default_thread_size_ = <span style="color:#b452cd">4</span>;
+</span></span><span style="display:flex;"><span>config.max_thread_size_ = <span style="color:#b452cd">4</span>;
+</span></span><span style="display:flex;"><span>config.monitor_enable_ = <span style="color:#658b00">false</span>;
+</span></span><span style="display:flex;"><span>UThreadPool <span style="color:#008b45">pool</span>(<span style="color:#658b00">true</span>, config);    <span style="color:#228b22">// 开辟一个4个线程的线程池，直接 init，并且参数设置为 config
+</span></span></span><span style="display:flex;"><span><span style="color:#228b22"></span>
+</span></span><span style="display:flex;"><span><span style="color:#228b22">// 指定pipeline使用的线程池
+</span></span></span><span style="display:flex;"><span><span style="color:#228b22"></span>pipeline_1-&gt;setSharedThreadPool(&amp;pool);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#228b22">// 多个pipeline，可以共享同一个线程池
+</span></span></span><span style="display:flex;"><span><span style="color:#228b22"></span>pipeline_2-&gt;setSharedThreadPool(&amp;pool);
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>异步执行 n 次：
+<ul>
+<li>只是包装了一下 std::async，没有其他特殊处理</li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><div style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-1"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-1">1</a>
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-C++" data-lang="C++"><span style="display:flex;"><span>    <span style="color:#8b008b;font-weight:bold">return</span> pipeline_1-&gt;asyncProcess(<span style="color:#b452cd">5</span>); <span style="color:#228b22">// std::future&lt;CStatus&gt;
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="有初始化参数的-gnode-t08">
+  有初始化参数的 GNode (T08)
+  <a class="anchor" href="#%e6%9c%89%e5%88%9d%e5%a7%8b%e5%8c%96%e5%8f%82%e6%95%b0%e7%9a%84-gnode-t08">#</a>
+</h3>
+<ul>
+<li>会用传入的参数，初始化这个 node。</li>
+</ul>
+<div class="highlight"><div style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-7-1"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-7-1">1</a>
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-C++" data-lang="C++"><span style="display:flex;"><span>pipeline-&gt;registerGElement&lt;MyTemplateNode&lt;<span style="color:#00688b;font-weight:bold">int</span>, <span style="color:#00688b;font-weight:bold">float</span>&gt;&gt;(&amp;a, {}, <span style="color:#b452cd">3</span>, <span style="color:#b452cd">3.5f</span>);
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="切面-gaspect-t09t10">
+  切面 GAspect ：（T09/T10）
+  <a class="anchor" href="#%e5%88%87%e9%9d%a2-gaspect-t09t10">#</a>
+</h3>
+<ul>
+<li>Observer，可以在几个执行点前后（init/run/destroy）插入逻辑。</li>
+</ul>
+<div class="highlight"><div style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-8-1"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-8-1">1</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-8-2"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-8-2">2</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-8-3"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-8-3">3</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-8-4"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-8-4">4</a>
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-C++" data-lang="C++"><span style="display:flex;"><span>    a-&gt;addGAspect&lt;MyTraceAspect&gt;();
+</span></span><span style="display:flex;"><span>    a-&gt;addGAspect&lt;MyTemplateAspect&lt;<span style="color:#00688b;font-weight:bold">int</span>, <span style="color:#00688b;font-weight:bold">double</span>&gt;&gt;(<span style="color:#b452cd">20</span>, <span style="color:#b452cd">7.0</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#228b22">// 继承GAspect之后，实现逻辑，beginInit、finishInit、beginRun、finishRun、beginDestroy、finishDestroy
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>可以通过切面参数，来传递一些信息</li>
+</ul>
+<div class="highlight"><div style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-9-1"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-9-1"> 1</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-9-2"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-9-2"> 2</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-9-3"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-9-3"> 3</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-9-4"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-9-4"> 4</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-9-5"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-9-5"> 5</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-9-6"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-9-6"> 6</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-9-7"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-9-7"> 7</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-9-8"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-9-8"> 8</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-9-9"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-9-9"> 9</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-9-10"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-9-10">10</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-9-11"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-9-11">11</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-9-12"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-9-12">12</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-9-13"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-9-13">13</a>
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-C++" data-lang="C++"><span style="display:flex;"><span><span style="color:#228b22">// 构造图的时候，addGAspect传入参数
+</span></span></span><span style="display:flex;"><span><span style="color:#228b22"></span>    a-&gt;addGAspect&lt;MyConnAspect, MyConnParam&gt;(&amp;paramA);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#228b22">// Aspect中，getAParam&lt;MyConnParam&gt;()获取参数
+</span></span></span><span style="display:flex;"><span><span style="color:#228b22"></span>    CStatus <span style="color:#008b45">beginInit</span>() <span style="color:#8b008b;font-weight:bold">override</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#8b008b;font-weight:bold">auto</span>* param = <span style="color:#8b008b;font-weight:bold">this</span>-&gt;getAParam&lt;MyConnParam&gt;();    <span style="color:#228b22">// 注意，这里是AParam，表示的是切面自己的参数，不是GParam
+</span></span></span><span style="display:flex;"><span><span style="color:#228b22"></span>        <span style="color:#8b008b;font-weight:bold">if</span> (param) {
+</span></span><span style="display:flex;"><span>            <span style="color:#228b22">// 如果传入类型不匹配，则返回param值为空
+</span></span></span><span style="display:flex;"><span><span style="color:#228b22"></span>            mockConnect(param-&gt;ip_, param-&gt;port_);
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#8b008b;font-weight:bold">return</span> CStatus();
+</span></span><span style="display:flex;"><span>    }
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="singleton-节点t11">
+  Singleton 节点（T11）
+  <a class="anchor" href="#singleton-%e8%8a%82%e7%82%b9t11">#</a>
+</h3>
+<ul>
+<li>单例</li>
+</ul>
+<h3 id="cfunction-节点t12">
+  CFunction 节点（T12）
+  <a class="anchor" href="#cfunction-%e8%8a%82%e7%82%b9t12">#</a>
+</h3>
+<ul>
+<li>用来把一个 lambda 构造成节点。 通过捕获列表，可以不通过 Param 功能传入传出一些信息，相当于开了个口子？</li>
+<li>看作者的介绍，也是不推荐这种用法，而是为了老代码的快速迁移</li>
+</ul>
+<blockquote>
+<p><a href="http://www.chunel.cn/archives/cgraph-function-introduce">http://www.chunel.cn/archives/cgraph-function-introduce</a></p>
+</blockquote>
+<div class="highlight"><div style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-10-1"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-10-1"> 1</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-10-2"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-10-2"> 2</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-10-3"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-10-3"> 3</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-10-4"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-10-4"> 4</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-10-5"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-10-5"> 5</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-10-6"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-10-6"> 6</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-10-7"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-10-7"> 7</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-10-8"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-10-8"> 8</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-10-9"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-10-9"> 9</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-10-10"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-10-10">10</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-10-11"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-10-11">11</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-10-12"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-10-12">12</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-10-13"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-10-13">13</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-10-14"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-10-14">14</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-10-15"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-10-15">15</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-10-16"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-10-16">16</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-10-17"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-10-17">17</a>
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-C++" data-lang="C++"><span style="display:flex;"><span>GFunctionPtr c_function, d_function = <span style="color:#8b008b;font-weight:bold">nullptr</span>;    <span style="color:#228b22">// 申明两个 GFunction 类型的变量
+</span></span></span><span style="display:flex;"><span><span style="color:#228b22"></span>
+</span></span><span style="display:flex;"><span><span style="color:#228b22">// 注册
+</span></span></span><span style="display:flex;"><span><span style="color:#228b22"></span>status += pipeline-&gt;registerGElement&lt;GFunction&gt;(&amp;c_function, {b}, <span style="color:#cd5555">&#34;functionC&#34;</span>, <span style="color:#b452cd">1</span>);    <span style="color:#228b22">// 注册GFunction类型的节点c_function
+</span></span></span><span style="display:flex;"><span><span style="color:#228b22"></span>
+</span></span><span style="display:flex;"><span><span style="color:#228b22">// 设置回调，可以设置多个
+</span></span></span><span style="display:flex;"><span><span style="color:#228b22"></span><span style="color:#00688b;font-weight:bold">int</span> num = <span style="color:#b452cd">10</span>;
+</span></span><span style="display:flex;"><span>d_function-&gt;setFunction(CFunctionType::INIT, [d_function] {
+</span></span><span style="display:flex;"><span>    CGRAPH_ECHO(<span style="color:#cd5555">&#34;[%s] do init function ...&#34;</span>, d_function-&gt;getName().c_str());
+</span></span><span style="display:flex;"><span>    <span style="color:#8b008b;font-weight:bold">return</span> <span style="color:#008b45">CStatus</span>();
+</span></span><span style="display:flex;"><span>})-&gt;setFunction(CFunctionType::RUN, [d_function, num] {
+</span></span><span style="display:flex;"><span>    <span style="color:#8b008b;font-weight:bold">auto</span> param = d_function-&gt;getGParamWithNoEmpty&lt;MyParam&gt;(<span style="color:#cd5555">&#34;param1&#34;</span>);
+</span></span><span style="display:flex;"><span>    param-&gt;iCount += num;
+</span></span><span style="display:flex;"><span>    CGRAPH_ECHO(<span style="color:#cd5555">&#34;[%s] do run function, iCount = [%d], iValue = [%d] ...&#34;</span>,
+</span></span><span style="display:flex;"><span>                d_function-&gt;getName().c_str(), param-&gt;iCount, ++param-&gt;iValue);
+</span></span><span style="display:flex;"><span>    <span style="color:#8b008b;font-weight:bold">return</span> <span style="color:#008b45">CStatus</span>();
+</span></span><span style="display:flex;"><span>});
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="定时任务daemont13">
+  定时任务：Daemon（T13）
+  <a class="anchor" href="#%e5%ae%9a%e6%97%b6%e4%bb%bb%e5%8a%a1daemont13">#</a>
+</h3>
+<div class="highlight"><div style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-11-1"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-11-1">1</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-11-2"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-11-2">2</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-11-3"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-11-3">3</a>
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-C++" data-lang="C++"><span style="display:flex;"><span>    pipeline-&gt;addGDaemon&lt;MyMonitorDaemon&gt;(<span style="color:#b452cd">4000</span>)   <span style="color:#228b22">// 间隔4s执行
+</span></span></span><span style="display:flex;"><span><span style="color:#228b22"></span>            -&gt;addGDaemon&lt;MyParamDaemon, MyConnParam&gt;(<span style="color:#b452cd">3500</span>, &amp;connParam)    <span style="color:#228b22">// 间隔3500ms执行，并且传入参数
+</span></span></span><span style="display:flex;"><span><span style="color:#228b22"></span>            -&gt;addGDaemon&lt;MyTemplateDaemon&lt;<span style="color:#00688b;font-weight:bold">int</span>&gt;&gt;(<span style="color:#b452cd">2750</span>, <span style="color:#b452cd">300</span>);    <span style="color:#228b22">// 添加模板daemon信息
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="hold-机制t14">
+  Hold 机制：（T14）
+  <a class="anchor" href="#hold-%e6%9c%ba%e5%88%b6t14">#</a>
+</h3>
+<ul>
+<li>通过一个条件，判断节点是否继续重复执行
+<ul>
+<li>为什么不直接在 run 里作为循环条件？ 不过相当于加了一个调度点</li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><div style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-12-1"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-12-1"> 1</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-12-2"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-12-2"> 2</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-12-3"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-12-3"> 3</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-12-4"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-12-4"> 4</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-12-5"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-12-5"> 5</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-12-6"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-12-6"> 6</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-12-7"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-12-7"> 7</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-12-8"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-12-8"> 8</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-12-9"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-12-9"> 9</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-12-10"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-12-10">10</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-12-11"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-12-11">11</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-12-12"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-12-12">12</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-12-13"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-12-13">13</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-12-14"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-12-14">14</a>
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-C++" data-lang="C++"><span style="display:flex;"><span>    CBool <span style="color:#008b45">isHold</span>() <span style="color:#8b008b;font-weight:bold">override</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#228b22">/**
+</span></span></span><span style="display:flex;"><span><span style="color:#228b22">         * 针对当前场景，添加 hold逻辑
+</span></span></span><span style="display:flex;"><span><span style="color:#228b22">         * 当 hold逻辑被满足的时候，会重复执行当前节点，直到返回false为止
+</span></span></span><span style="display:flex;"><span><span style="color:#228b22">         * 也可以用isHold机制，实现算子内部自己的状态机机制
+</span></span></span><span style="display:flex;"><span><span style="color:#228b22">         */</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#8b008b;font-weight:bold">auto</span> param = CGRAPH_GET_GPARAM(MyParam, HOLD_PARAM_NAME)
+</span></span><span style="display:flex;"><span>        <span style="color:#8b008b;font-weight:bold">if</span> (<span style="color:#8b008b;font-weight:bold">nullptr</span> == param) {
+</span></span><span style="display:flex;"><span>            <span style="color:#8b008b;font-weight:bold">return</span> <span style="color:#658b00">false</span>;    <span style="color:#228b22">// 如果未读取到参数，则直接结束，不继续执行了
+</span></span></span><span style="display:flex;"><span><span style="color:#228b22"></span>        }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        CGraph::CGRAPH_ECHO(<span style="color:#cd5555">&#34;enter hold path, iValue = [%d]&#34;</span>, param-&gt;iValue);
+</span></span><span style="display:flex;"><span>        <span style="color:#8b008b;font-weight:bold">return</span> param-&gt;iValue &lt; <span style="color:#b452cd">5</span>;    <span style="color:#228b22">// 当 iValue 值小于5的时候，此节点会持续执行
+</span></span></span><span style="display:flex;"><span><span style="color:#228b22"></span>    }
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="参数eparamt15">
+  参数：EParam（T15）
+  <a class="anchor" href="#%e5%8f%82%e6%95%b0eparamt15">#</a>
+</h3>
+<ul>
+<li>更像 side_packet，不在 pipeline 中共享，节点独有。</li>
+</ul>
+<div class="highlight"><div style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-13-1"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-13-1">1</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-13-2"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-13-2">2</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-13-3"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-13-3">3</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-13-4"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-13-4">4</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-13-5"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-13-5">5</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-13-6"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-13-6">6</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-13-7"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-13-7">7</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-13-8"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-13-8">8</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-13-9"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-13-9">9</a>
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-C++" data-lang="C++"><span style="display:flex;"><span><span style="color:#228b22">// 给节点添加参数
+</span></span></span><span style="display:flex;"><span><span style="color:#228b22"></span>v1-&gt;addEParam(VERSION_PARAM_KEY, &amp;vp1);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#228b22">// 节点内部获取参数
+</span></span></span><span style="display:flex;"><span><span style="color:#228b22"></span><span style="color:#8b008b;font-weight:bold">auto</span>* version = CGRAPH_GET_EPARAM(MyVersionParam, VERSION_PARAM_KEY)
+</span></span><span style="display:flex;"><span><span style="color:#8b008b;font-weight:bold">if</span> (<span style="color:#8b008b;font-weight:bold">nullptr</span> != version) {
+</span></span><span style="display:flex;"><span>    CGraph::CGRAPH_ECHO(<span style="color:#cd5555">&#34;[%s] version is [%d-%d]&#34;</span>,
+</span></span><span style="display:flex;"><span>                        <span style="color:#8b008b;font-weight:bold">this</span>-&gt;getName().c_str(), version-&gt;priority_, version-&gt;secondary_);
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="消息传递messaget16t17">
+  消息传递：Message（T16、T17）
+  <a class="anchor" href="#%e6%b6%88%e6%81%af%e4%bc%a0%e9%80%92messaget16t17">#</a>
+</h3>
+<ul>
+<li>前面的 param，只能在单个 pipeline 中共享数据。</li>
+<li>Message，可以在多个 pipeline 之间传递消息。</li>
+<li>send/recv：一发一收，channel。</li>
+</ul>
+<div class="highlight"><div style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-14-1"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-14-1">1</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-14-2"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-14-2">2</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-14-3"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-14-3">3</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-14-4"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-14-4">4</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-14-5"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-14-5">5</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-14-6"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-14-6">6</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-14-7"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-14-7">7</a>
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-C++" data-lang="C++"><span style="display:flex;"><span><span style="color:#228b22">// 发送
+</span></span></span><span style="display:flex;"><span><span style="color:#228b22"></span>std::unique_ptr&lt;MyMessageParam&gt; mp(<span style="color:#8b008b;font-weight:bold">new</span> MyMessageParam());
+</span></span><span style="display:flex;"><span>CStatus status = CGRAPH_SEND_MPARAM(MyMessageParam, <span style="color:#cd5555">&#34;send-recv&#34;</span>, mp, CGraph::GMessagePushStrategy::WAIT)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#228b22">// 接收
+</span></span></span><span style="display:flex;"><span><span style="color:#228b22"></span>std::unique_ptr&lt;MyMessageParam&gt; mp = <span style="color:#8b008b;font-weight:bold">nullptr</span>;    <span style="color:#228b22">// 接收一个消息
+</span></span></span><span style="display:flex;"><span><span style="color:#228b22"></span>CStatus status = CGRAPH_RECV_MPARAM(MyMessageParam, <span style="color:#cd5555">&#34;send-recv&#34;</span>, mp);
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>pub/sub：一发多收</li>
+</ul>
+<div class="highlight"><div style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-15-1"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-15-1">1</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-15-2"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-15-2">2</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-15-3"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-15-3">3</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-15-4"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-15-4">4</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-15-5"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-15-5">5</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-15-6"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-15-6">6</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-15-7"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-15-7">7</a>
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-C++" data-lang="C++"><span style="display:flex;"><span><span style="color:#228b22">// 发送
+</span></span></span><span style="display:flex;"><span><span style="color:#228b22"></span>MyMessageParam mp;    <span style="color:#228b22">// 创建一个消息，并且发送出去
+</span></span></span><span style="display:flex;"><span><span style="color:#228b22"></span>CStatus status = CGRAPH_PUB_MPARAM(MyMessageParam, <span style="color:#cd5555">&#34;pub-sub&#34;</span>, mp, CGraph::GMessagePushStrategy::WAIT);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#228b22">// 接收
+</span></span></span><span style="display:flex;"><span><span style="color:#228b22"></span>std::unique_ptr&lt;MyMessageParam&gt; mp = <span style="color:#8b008b;font-weight:bold">nullptr</span>;    <span style="color:#228b22">// 通过智能指针类型，接收一个消息。相比value接收(Recv or Sub)，性能会好一些
+</span></span></span><span style="display:flex;"><span><span style="color:#228b22"></span>CStatus status = CGRAPH_SUB_MPARAM(MyMessageParam, conn_id_, mp)
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="事件eventt18">
+  事件：Event（T18）
+  <a class="anchor" href="#%e4%ba%8b%e4%bb%b6eventt18">#</a>
+</h3>
+<ul>
+<li>方便在一些特定的条件下，触发一段逻辑的执行。可以同步/异步</li>
+</ul>
+<div class="highlight"><div style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-16-1"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-16-1">1</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-16-2"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-16-2">2</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-16-3"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-16-3">3</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-16-4"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-16-4">4</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-16-5"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-16-5">5</a>
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-C++" data-lang="C++"><span style="display:flex;"><span><span style="color:#228b22">// 构建pipeline时，可以添加event触发后的执行逻辑
+</span></span></span><span style="display:flex;"><span><span style="color:#228b22"></span>pipeline-&gt;addGEvent&lt;MyPrintEvent&gt;(<span style="color:#cd5555">&#34;my-print-event&#34;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#228b22">// 在graph的执行过程中，node内部可以通过notify来触发一段逻辑的执行
+</span></span></span><span style="display:flex;"><span><span style="color:#228b22"></span>notify(<span style="color:#cd5555">&#34;my-print-event&#34;</span>, GEventType::SYNC);
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="执行控制t19t20">
+  执行控制（T19、T20）
+  <a class="anchor" href="#%e6%89%a7%e8%a1%8c%e6%8e%a7%e5%88%b6t19t20">#</a>
+</h3>
+<p>可以对 pipeline 的执行进行一定的控制</p>
+<ul>
+<li>取消：（T19）</li>
+</ul>
+<div class="highlight"><div style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-17-1"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-17-1">1</a>
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-C++" data-lang="C++"><span style="display:flex;"><span>pipeline-&gt;cancel()
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>yield/resume（T20）</li>
+</ul>
+<div class="highlight"><div style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-18-1"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-18-1">1</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-18-2"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-18-2">2</a>
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-C++" data-lang="C++"><span style="display:flex;"><span>status += pipeline-&gt;yield();    <span style="color:#228b22">// 暂停执行，保留当前pipeline内部所有参数信息和状态信息
+</span></span></span><span style="display:flex;"><span><span style="color:#228b22"></span>status += pipeline-&gt;resume();     <span style="color:#228b22">// 暂停一段时间后，恢复执行
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="条件选择multiconditiont21">
+  条件选择：MultiCondition（T21）
+  <a class="anchor" href="#%e6%9d%a1%e4%bb%b6%e9%80%89%e6%8b%a9multiconditiont21">#</a>
+</h3>
+<ul>
+<li>可以把几个 node 组合到一起</li>
+<li>node 中，override <code>isMatch</code> 方法，来决定是否需要执行</li>
+</ul>
+<div class="highlight"><div style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-19-1"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-19-1">1</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-19-2"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-19-2">2</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-19-3"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-19-3">3</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-19-4"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-19-4">4</a>
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-C++" data-lang="C++"><span style="display:flex;"><span>b_multi_condition = pipeline-&gt;createGGroup&lt;GMultiCondition&lt;GMultiConditionType::SERIAL&gt;&gt;({
+</span></span><span style="display:flex;"><span>    pipeline-&gt;createGNode&lt;MyNode1&gt;(GNodeInfo(<span style="color:#cd5555">&#34;nodeB1&#34;</span>)),    <span style="color:#228b22">// 本节点【不会】执行，因为默认不执行
+</span></span></span><span style="display:flex;"><span><span style="color:#228b22"></span>    pipeline-&gt;createGNode&lt;MyMatchNode&gt;(GNodeInfo(<span style="color:#cd5555">&#34;nodeB2&#34;</span>))    <span style="color:#228b22">// 本节点【会】执行，因为 isMatch() 返回为 true
+</span></span></span><span style="display:flex;"><span><span style="color:#228b22"></span>});
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="超时timeoutt22">
+  超时：Timeout（T22）
+  <a class="anchor" href="#%e8%b6%85%e6%97%b6timeoutt22">#</a>
+</h3>
+<h3 id="some任意一个完成即可触发后续任务t23">
+  Some：任意一个完成，即可触发后续任务（T23）
+  <a class="anchor" href="#some%e4%bb%bb%e6%84%8f%e4%b8%80%e4%b8%aa%e5%ae%8c%e6%88%90%e5%8d%b3%e5%8f%af%e8%a7%a6%e5%8f%91%e5%90%8e%e7%bb%ad%e4%bb%bb%e5%8a%a1t23">#</a>
+</h3>
+<h3 id="fence用来等待异步任务结束t24">
+  Fence：用来等待异步任务结束（T24）
+  <a class="anchor" href="#fence%e7%94%a8%e6%9d%a5%e7%ad%89%e5%be%85%e5%bc%82%e6%ad%a5%e4%bb%bb%e5%8a%a1%e7%bb%93%e6%9d%9ft24">#</a>
+</h3>
+<h3 id="coordinator运行过程中动态调整线程数t25">
+  Coordinator：运行过程中，动态调整线程数（T25）
+  <a class="anchor" href="#coordinator%e8%bf%90%e8%a1%8c%e8%bf%87%e7%a8%8b%e4%b8%ad%e5%8a%a8%e6%80%81%e8%b0%83%e6%95%b4%e7%ba%bf%e7%a8%8b%e6%95%b0t25">#</a>
+</h3>
+<h3 id="mutable运行过程中动态调整依赖关系t26">
+  Mutable：运行过程中，动态调整依赖关系（T26）
+  <a class="anchor" href="#mutable%e8%bf%90%e8%a1%8c%e8%bf%87%e7%a8%8b%e4%b8%ad%e5%8a%a8%e6%80%81%e8%b0%83%e6%95%b4%e4%be%9d%e8%b5%96%e5%85%b3%e7%b3%bbt26">#</a>
+</h3>
+<p><code>reshape</code></p>
+<div class="highlight"><div style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-20-1"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-20-1"> 1</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-20-2"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-20-2"> 2</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-20-3"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-20-3"> 3</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-20-4"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-20-4"> 4</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-20-5"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-20-5"> 5</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-20-6"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-20-6"> 6</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-20-7"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-20-7"> 7</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-20-8"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-20-8"> 8</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-20-9"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-20-9"> 9</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-20-10"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-20-10">10</a>
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-C++" data-lang="C++"><span style="display:flex;"><span>    CStatus <span style="color:#008b45">reshape</span>(CGraph::GElementPtrArr&amp; elements) <span style="color:#8b008b;font-weight:bold">override</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#8b008b;font-weight:bold">auto</span> param = CGRAPH_GET_GPARAM_WITH_NO_EMPTY(MyParam, <span style="color:#cd5555">&#34;param1&#34;</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#00688b;font-weight:bold">int</span> count = param-&gt;iCount % <span style="color:#b452cd">4</span>;
+</span></span><span style="display:flex;"><span>        <span style="color:#8b008b;font-weight:bold">if</span> (<span style="color:#b452cd">0</span> == count) {
+</span></span><span style="display:flex;"><span>            CGraph::CGRAPH_ECHO(<span style="color:#cd5555">&#34;---- run as a-&gt;[b,c]&#34;</span>);
+</span></span><span style="display:flex;"><span>            (*elements[<span style="color:#b452cd">0</span>])--&gt;elements[<span style="color:#b452cd">1</span>] &amp; elements[<span style="color:#b452cd">2</span>];
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#228b22">// ...
+</span></span></span><span style="display:flex;"><span><span style="color:#228b22"></span>        <span style="color:#8b008b;font-weight:bold">return</span> CStatus();
+</span></span><span style="display:flex;"><span>    }
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="trim删除不必要的依赖关系t27">
+  trim()：删除不必要的依赖关系（T27）
+  <a class="anchor" href="#trim%e5%88%a0%e9%99%a4%e4%b8%8d%e5%bf%85%e8%a6%81%e7%9a%84%e4%be%9d%e8%b5%96%e5%85%b3%e7%b3%bbt27">#</a>
+</h3>
+<div class="highlight"><div style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-21-1"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-21-1"> 1</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-21-2"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-21-2"> 2</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-21-3"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-21-3"> 3</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-21-4"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-21-4"> 4</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-21-5"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-21-5"> 5</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-21-6"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-21-6"> 6</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-21-7"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-21-7"> 7</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-21-8"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-21-8"> 8</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-21-9"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-21-9"> 9</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-21-10"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-21-10">10</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-21-11"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-21-11">11</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-21-12"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-21-12">12</a>
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-C++" data-lang="C++"><span style="display:flex;"><span>pipeline-&gt;registerGElement&lt;MyNode1&gt;(&amp;a, {}, <span style="color:#cd5555">&#34;nodeA&#34;</span>);
+</span></span><span style="display:flex;"><span>pipeline-&gt;registerGElement&lt;MyNode2&gt;(&amp;b, {a}, <span style="color:#cd5555">&#34;nodeB&#34;</span>);
+</span></span><span style="display:flex;"><span>pipeline-&gt;registerGElement&lt;MyNode1&gt;(&amp;c, {a}, <span style="color:#cd5555">&#34;nodeC&#34;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#228b22">/**
+</span></span></span><span style="display:flex;"><span><span style="color:#228b22"> * 可以看出，d节点 对a 的依赖，是可有可无的
+</span></span></span><span style="display:flex;"><span><span style="color:#228b22"> * 建议通过 trim() 接口删除冗余依赖
+</span></span></span><span style="display:flex;"><span><span style="color:#228b22"> * 参考文档：http://www.chunel.cn/archives/cgraph-remove-redundancy-link
+</span></span></span><span style="display:flex;"><span><span style="color:#228b22"> */</span>
+</span></span><span style="display:flex;"><span>pipeline-&gt;registerGElement&lt;MyNode2&gt;(&amp;d, {a, b, c}, <span style="color:#cd5555">&#34;nodeD&#34;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#8b008b;font-weight:bold">auto</span> trimSize = pipeline-&gt;trim();
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="线程池tu01">
+  线程池（TU01）
+  <a class="anchor" href="#%e7%ba%bf%e7%a8%8b%e6%b1%a0tu01">#</a>
+</h3>
+<ul>
+<li>提交任务
+<ul>
+<li>commit 非阻塞接口</li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><div style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-22-1"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-22-1">1</a>
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-C++" data-lang="C++"><span style="display:flex;"><span><span style="color:#8b008b;font-weight:bold">auto</span> r1 = tp-&gt;commit([i, j] { <span style="color:#8b008b;font-weight:bold">return</span> <span style="color:#008b45">add</span>(i, j); });
+</span></span></code></pre></td></tr></table>
+</div>
+</div><pre><code>- submit：阻塞接口
+
+```C++
+tp-&gt;submit([i] { std::cout &lt;&lt; i &lt;&lt; &quot; &quot;; });    // 可以看到，submit版本是有序执行的。如果需要想要无序执行，可以通过创建taskGroup的方式进行，或者使用commit方法
+```
+</code></pre>
+<ul>
+<li>
+<p>taskGroup：可以把一组任务，放到一起提交，来统一设置超时时间</p>
+<div class="highlight"><div style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-23-1"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-23-1"> 1</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-23-2"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-23-2"> 2</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-23-3"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-23-3"> 3</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-23-4"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-23-4"> 4</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-23-5"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-23-5"> 5</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-23-6"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-23-6"> 6</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-23-7"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-23-7"> 7</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-23-8"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-23-8"> 8</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-23-9"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-23-9"> 9</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-23-10"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-23-10">10</a>
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-C++" data-lang="C++"><span style="display:flex;"><span>UTaskGroup taskGroup;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#228b22">/** 添加一个耗时为1000ms的任务 */</span>
+</span></span><span style="display:flex;"><span>taskGroup.addTask([i, j] {
+</span></span><span style="display:flex;"><span>    <span style="color:#00688b;font-weight:bold">int</span> result = i + j;
+</span></span><span style="display:flex;"><span>    CGRAPH_SLEEP_MILLISECOND(<span style="color:#b452cd">1000</span>)
+</span></span><span style="display:flex;"><span>    CGRAPH_ECHO(<span style="color:#cd5555">&#34;sleep for 1 second, [%d] + [%d] = [%d], run success.&#34;</span>, i, j, result);
+</span></span><span style="display:flex;"><span>});
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>CStatus status = tp-&gt;submit(taskGroup, <span style="color:#b452cd">2500</span>);
+</span></span></code></pre></td></tr></table>
+</div>
+</div></li>
+</ul>
+</article>
+ 
+      
+
+      <footer class="book-footer">
+        
+  <div class="flex flex-wrap justify-between">
+
+
+
+
+
+</div>
+
+
+
+  <script>(function(){function e(e){const t=window.getSelection(),n=document.createRange();n.selectNodeContents(e),t.removeAllRanges(),t.addRange(n)}document.querySelectorAll("pre code").forEach(t=>{t.addEventListener("click",function(){if(window.getSelection().toString())return;e(t.parentElement),navigator.clipboard&&navigator.clipboard.writeText(t.parentElement.textContent)})})})()</script>
+
+
+ 
+        
+      </footer>
+
+      
+  
+  <div class="book-comments">
+
+</div>
+  
+ 
+
+      <label for="menu-control" class="hidden book-menu-overlay"></label>
+    </div>
+
+    
+    <aside class="book-toc">
+      <div class="book-toc-content">
+        
+  
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#功能">功能</a>
+      <ul>
+        <li><a href="#建立依赖图关系gpipelinegnodet00t01">建立依赖图关系：GPipeline、GNode（T00/T01）</a></li>
+        <li><a href="#子图cluster--region类似-subgraph互相可嵌套t02t03t04">子图：Cluster / Region：类似 subgraph，互相可嵌套（T02/T03/T04）</a></li>
+        <li><a href="#参数传递param-t05">参数传递：param (T05)</a></li>
+        <li><a href="#条件选择condition-t06">条件选择：Condition （T06）</a></li>
+        <li><a href="#多条-pipeline-t07">多条 pipeline (T07)</a></li>
+        <li><a href="#有初始化参数的-gnode-t08">有初始化参数的 GNode (T08)</a></li>
+        <li><a href="#切面-gaspect-t09t10">切面 GAspect ：（T09/T10）</a></li>
+        <li><a href="#singleton-节点t11">Singleton 节点（T11）</a></li>
+        <li><a href="#cfunction-节点t12">CFunction 节点（T12）</a></li>
+        <li><a href="#定时任务daemont13">定时任务：Daemon（T13）</a></li>
+        <li><a href="#hold-机制t14">Hold 机制：（T14）</a></li>
+        <li><a href="#参数eparamt15">参数：EParam（T15）</a></li>
+        <li><a href="#消息传递messaget16t17">消息传递：Message（T16、T17）</a></li>
+        <li><a href="#事件eventt18">事件：Event（T18）</a></li>
+        <li><a href="#执行控制t19t20">执行控制（T19、T20）</a></li>
+        <li><a href="#条件选择multiconditiont21">条件选择：MultiCondition（T21）</a></li>
+        <li><a href="#超时timeoutt22">超时：Timeout（T22）</a></li>
+        <li><a href="#some任意一个完成即可触发后续任务t23">Some：任意一个完成，即可触发后续任务（T23）</a></li>
+        <li><a href="#fence用来等待异步任务结束t24">Fence：用来等待异步任务结束（T24）</a></li>
+        <li><a href="#coordinator运行过程中动态调整线程数t25">Coordinator：运行过程中，动态调整线程数（T25）</a></li>
+        <li><a href="#mutable运行过程中动态调整依赖关系t26">Mutable：运行过程中，动态调整依赖关系（T26）</a></li>
+        <li><a href="#trim删除不必要的依赖关系t27">trim()：删除不必要的依赖关系（T27）</a></li>
+        <li><a href="#线程池tu01">线程池（TU01）</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+
+
+ 
+      </div>
+    </aside>
+    
+  </main>
+
+  
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+

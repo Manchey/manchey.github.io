@@ -1,0 +1,8 @@
+<ul style="list-style: none; padding-left: 0;">
+    {{ range (first 25 (where .Site.RegularPages "Type" "diary")) }}
+      <li style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+        <div class="diary">{{.Date.Format "2006-01-02"}}</div>
+        <a href="{{ .RelPermalink}}">{{ .Title }}</a> 
+      </li>
+    {{ end }}
+</ul>
