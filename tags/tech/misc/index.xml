@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Tech/Misc on Manchey Blog</title>
+    <link>http://localhost:1313/tags/tech/misc/</link>
+    <description>Recent content in Tech/Misc on Manchey Blog</description>
+    <generator>Hugo</generator>
+    <language>en-us</language>
+    <copyright>© Manchey Lee 2024</copyright>
+    <lastBuildDate>Tue, 22 Oct 2024 00:00:00 +0000</lastBuildDate>
+    <atom:link href="http://localhost:1313/tags/tech/misc/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>docker命令</title>
+      <link>http://localhost:1313/posts/2024/10/docker%E5%91%BD%E4%BB%A4/</link>
+      <pubDate>Tue, 22 Oct 2024 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/2024/10/docker%E5%91%BD%E4%BB%A4/</guid>
+      <description>&lt;h1 id=&#34;查看具体镜像和容器占用的空间&#34;&gt;&#xA;  查看具体镜像和容器占用的空间&#xA;  &lt;a class=&#34;anchor&#34; href=&#34;#%e6%9f%a5%e7%9c%8b%e5%85%b7%e4%bd%93%e9%95%9c%e5%83%8f%e5%92%8c%e5%ae%b9%e5%99%a8%e5%8d%a0%e7%94%a8%e7%9a%84%e7%a9%ba%e9%97%b4&#34;&gt;#&lt;/a&gt;&#xA;&lt;/h1&gt;&#xA;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;# 查看所有镜像的大小&lt;/span&gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;docker images&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;# 查看所有容器的大小&lt;/span&gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;docker ps -a --size&#xA;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h1 id=&#34;查看-docker-系统信息&#34;&gt;&#xA;  查看 Docker 系统信息&#xA;  &lt;a class=&#34;anchor&#34; href=&#34;#%e6%9f%a5%e7%9c%8b-docker-%e7%b3%bb%e7%bb%9f%e4%bf%a1%e6%81%af&#34;&gt;#&lt;/a&gt;&#xA;&lt;/h1&gt;&#xA;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;docker system df&#xA;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;这个命令会显示：&lt;/p&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;镜像的总数和占用的空间&lt;/li&gt;&#xA;&lt;li&gt;容器的总数和占用的空间&lt;/li&gt;&#xA;&lt;li&gt;卷的总数和占用的空间&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;h1 id=&#34;清理构建缓存&#34;&gt;&#xA;  清理构建缓存&#xA;  &lt;a class=&#34;anchor&#34; href=&#34;#%e6%b8%85%e7%90%86%e6%9e%84%e5%bb%ba%e7%bc%93%e5%ad%98&#34;&gt;#&lt;/a&gt;&#xA;&lt;/h1&gt;&#xA;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;docker builder prune&#xA;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;</description>
+    </item>
+    <item>
+      <title>清理DNS</title>
+      <link>http://localhost:1313/posts/2024/10/%E6%B8%85%E7%90%86dns/</link>
+      <pubDate>Wed, 16 Oct 2024 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/2024/10/%E6%B8%85%E7%90%86dns/</guid>
+      <description>&lt;p&gt;sudo killall -HUP mDNSResponder&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>环境配置</title>
+      <link>http://localhost:1313/posts/2024/04/%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE/</link>
+      <pubDate>Fri, 12 Apr 2024 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/2024/04/%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE/</guid>
+      <description>&lt;p&gt;{% raw %}&lt;/p&gt;&#xA;&lt;h1 id=&#34;mac环境&#34;&gt;&#xA;  mac环境&#xA;  &lt;a class=&#34;anchor&#34; href=&#34;#mac%e7%8e%af%e5%a2%83&#34;&gt;#&lt;/a&gt;&#xA;&lt;/h1&gt;&#xA;&lt;h2 id=&#34;整理launcher&#34;&gt;&#xA;  整理launcher&#xA;  &lt;a class=&#34;anchor&#34; href=&#34;#%e6%95%b4%e7%90%86launcher&#34;&gt;#&lt;/a&gt;&#xA;&lt;/h2&gt;&#xA;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;defaults write com.apple.dock ResetLaunchPad -bool true &lt;span style=&#34;color:#f92672&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt; killall Dock &#xA;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id=&#34;iterm2快捷键&#34;&gt;&#xA;  iterm2快捷键&#xA;  &lt;a class=&#34;anchor&#34; href=&#34;#iterm2%e5%bf%ab%e6%8d%b7%e9%94%ae&#34;&gt;#&lt;/a&gt;&#xA;&lt;/h2&gt;&#xA;&lt;p&gt;【command + 数字 command + 左右方向键】切换标签&#xA;【command + f】查找&#xA;【command + d】垂直分屏&#xA;【command + shift + d】水平分屏&#xA;【command + option + 方向键 command + [或 command +] 】切换屏幕&#xA;【command + ;】查看历史命令&#xA;【command + shift + h】查看剪贴板历史&#xA;【ctrl + u】清除当前行&#xA;【ctrl + l】清屏&lt;/p&gt;&#xA;&lt;p&gt;【ctrl + f/b】 前进后退&#xA;【ctrl + p】 上一条命令&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="
+  编译适配
+  #
+
+主要参考：https://www.tweag.io/blog/2023-07-27-building-rust-workspace-with-bazel/
+
+  1）加入rules_rust
+  #
+
+在WORKSPACE中加入：
+http_archive(
+    name = &#34;rules_rust&#34;,
+    sha256 = &#34;36ab8f9facae745c9c9c1b33d225623d976e78f2cc3f729b7973d8c20934ab95&#34;,
+    urls = [&#34;https://github.com/bazelbuild/rules_rust/releases/download/0.31.0/rules_rust-v0.31.0.tar.gz&#34;    ],
+)
+
+load(&#34;@rules_rust//rust:repositories.bzl&#34;, &#34;rules_rust_dependencies&#34;, &#34;rust_register_toolchains&#34;)
+rules_rust_dependencies()
+rust_register_toolchains()
+
+# 声明使用的rust版本，最新的是2024，我选了一个次新的
+rust_register_toolchains(
+    edition = &#34;2021&#34;,
+)
+
+  2）设置外部依赖
+  #
+
+添加外部依赖，在WORKSPACE中添加：
+load(&#34;@rules_rust//crate_universe:repositories.bzl&#34;, &#34;crate_universe_dependencies&#34;)
+crate_universe_dependencies()
+load(&#34;@rules_rust//crate_universe:defs.bzl&#34;, &#34;crates_repository&#34;)
+
+crates_repository(
+    name = &#34;crate_index&#34;,
+    cargo_lockfile = &#34;//xxx_tool:Cargo.lock&#34;,
+    lockfile = &#34;//:cargo-bazel-lock.json&#34;,
+    manifests = [
+        &#34;//xxx_tool:Cargo.toml&#34;,
+        &#34;//xxx_tool/common:Cargo.toml&#34;,
+        &#34;//xxx_tool/xxx_monitor:Cargo.toml&#34;,
+    ],
+    generate_build_scripts = True,
+)
+
+load(&#34;@crate_index//:defs.bzl&#34;, &#34;crate_repositories&#34;)
+crate_repositories()
+必须先执行一下：
+touch cargo-bazel-lock.json
+CARGO_BAZEL_REPIN=1 bazel sync --only=crate_index
+执行上述命令会读取Cargo.toml和Cargo.lock，并将依赖信息写到cargo-bazel-lock.json中，通过bazel命令可以查询具体包含了哪些依赖：
+bazel query @crate_index//...
+
+  3）添加target规则
+  #
+
+package(default_visibility = [&#34;//visibility:public&#34;])
+
+load(&#34;@rules_rust//rust:defs.bzl&#34;, &#34;rust_library&#34;)
+
+rust_library(
+    name = &#34;common&#34;,
+    srcs = glob([
+        &#34;src/**/*.rs&#34;,
+    ]),
+    edition = &#34;2021&#34;,
+    deps = [
+        &#34;@crate_index//:chrono&#34;,
+        &#34;@crate_index//:lazy_static&#34;,
+        &#34;@crate_index//:log&#34;,
+        &#34;@crate_index//:log4rs&#34;,
+        &#34;@crate_index//:nix&#34;,
+        &#34;@crate_index//:serde&#34;,
+        &#34;@crate_index//:tokio&#34;,
+        &#34;@crate_index//:uname&#34;,
+    ],
+    proc_macro_deps = [
+        &#34;@crate_index//:serde_derive&#34;,
+    ],
+)
+
+  Rust call c&#43;&#43;编译问题
+  #
+
+
+rust调用c&#43;&#43;代码，一般几种方式：cxx、autocxx、bindgen
+
+此前用的autocxx，相对来说是最方便使用的，不需要自己手动写大量的胶水层代码
+
+
+autocxx本身目前没有现成的bazel方案，但一些开源相关工作可以参考：
+
+autocxx仓库的bazel PR：https://github.com/google/autocxx/pull/1255
+有一个开源库，自己做了autocxx的bazel集成：https://github.com/frc971/971-Robot-Code/blob/main/tools/build_rules/autocxx.bzl
+
+
+autocxx的原理介绍：
+
+https://google.github.io/autocxx/building.html
+重点是通过autocxx-gen工具，生成对应的cpp/rs胶水层代码并编译。
+之前的build.rs脚本中autocxx提供的函数其实就是封装了这一过程。
+
+
+
+
+  生成过程
+  #
+
+
+先把依赖的几个proto编译一下，把头文件生成出来。
+然后执行autocxx-gen
+
+autocxx-gen ./xxx.rs \
+            --outdir ./test-output/ \
+            --gen-cpp \
+            --gen-rs-include \
+            --inc ./ \
+            --inc ./bazel-bin \
+
+参数解释：
+
+cpp_interface.rs：调用了c&#43;&#43;的rust代码
+&ndash;outdir：输出文件夹
+&ndash;gen-cpp：指定生成c&#43;&#43;胶水层代码
+&ndash;gen-rs-include：指定生成rust胶水层代码
+&ndash;inc：按需指定依赖的各个头文件路径
+
+
+">
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#343a40">
+<meta name="color-scheme" content="light dark"><meta property="og:url" content="http://localhost:1313/posts/1/01/%E4%BD%BF%E7%94%A8bazel%E7%BC%96%E8%AF%91rust%E9%A1%B9%E7%9B%AE/">
+  <meta property="og:site_name" content="Manchey Blog">
+  <meta property="og:title" content="使用bazel编译rust项目">
+  <meta property="og:description" content="编译适配 # 主要参考：https://www.tweag.io/blog/2023-07-27-building-rust-workspace-with-bazel/
+1）加入rules_rust # 在WORKSPACE中加入：
+http_archive( name = &#34;rules_rust&#34;, sha256 = &#34;36ab8f9facae745c9c9c1b33d225623d976e78f2cc3f729b7973d8c20934ab95&#34;, urls = [&#34;https://github.com/bazelbuild/rules_rust/releases/download/0.31.0/rules_rust-v0.31.0.tar.gz&#34; ], ) load(&#34;@rules_rust//rust:repositories.bzl&#34;, &#34;rules_rust_dependencies&#34;, &#34;rust_register_toolchains&#34;) rules_rust_dependencies() rust_register_toolchains() # 声明使用的rust版本，最新的是2024，我选了一个次新的 rust_register_toolchains( edition = &#34;2021&#34;, ) 2）设置外部依赖 # 添加外部依赖，在WORKSPACE中添加：
+load(&#34;@rules_rust//crate_universe:repositories.bzl&#34;, &#34;crate_universe_dependencies&#34;) crate_universe_dependencies() load(&#34;@rules_rust//crate_universe:defs.bzl&#34;, &#34;crates_repository&#34;) crates_repository( name = &#34;crate_index&#34;, cargo_lockfile = &#34;//xxx_tool:Cargo.lock&#34;, lockfile = &#34;//:cargo-bazel-lock.json&#34;, manifests = [ &#34;//xxx_tool:Cargo.toml&#34;, &#34;//xxx_tool/common:Cargo.toml&#34;, &#34;//xxx_tool/xxx_monitor:Cargo.toml&#34;, ], generate_build_scripts = True, ) load(&#34;@crate_index//:defs.bzl&#34;, &#34;crate_repositories&#34;) crate_repositories() 必须先执行一下：
+touch cargo-bazel-lock.json CARGO_BAZEL_REPIN=1 bazel sync --only=crate_index 执行上述命令会读取Cargo.toml和Cargo.lock，并将依赖信息写到cargo-bazel-lock.json中，通过bazel命令可以查询具体包含了哪些依赖：
+bazel query @crate_index//... 3）添加target规则 # package(default_visibility = [&#34;//visibility:public&#34;]) load(&#34;@rules_rust//rust:defs.bzl&#34;, &#34;rust_library&#34;) rust_library( name = &#34;common&#34;, srcs = glob([ &#34;src/**/*.rs&#34;, ]), edition = &#34;2021&#34;, deps = [ &#34;@crate_index//:chrono&#34;, &#34;@crate_index//:lazy_static&#34;, &#34;@crate_index//:log&#34;, &#34;@crate_index//:log4rs&#34;, &#34;@crate_index//:nix&#34;, &#34;@crate_index//:serde&#34;, &#34;@crate_index//:tokio&#34;, &#34;@crate_index//:uname&#34;, ], proc_macro_deps = [ &#34;@crate_index//:serde_derive&#34;, ], ) Rust call c&#43;&#43;编译问题 # rust调用c&#43;&#43;代码，一般几种方式：cxx、autocxx、bindgen 此前用的autocxx，相对来说是最方便使用的，不需要自己手动写大量的胶水层代码 autocxx本身目前没有现成的bazel方案，但一些开源相关工作可以参考： autocxx仓库的bazel PR：https://github.com/google/autocxx/pull/1255 有一个开源库，自己做了autocxx的bazel集成：https://github.com/frc971/971-Robot-Code/blob/main/tools/build_rules/autocxx.bzl autocxx的原理介绍： https://google.github.io/autocxx/building.html 重点是通过autocxx-gen工具，生成对应的cpp/rs胶水层代码并编译。 之前的build.rs脚本中autocxx提供的函数其实就是封装了这一过程。 生成过程 # 先把依赖的几个proto编译一下，把头文件生成出来。 然后执行autocxx-gen autocxx-gen ./xxx.rs \ --outdir ./test-output/ \ --gen-cpp \ --gen-rs-include \ --inc ./ \ --inc ./bazel-bin \ 参数解释： cpp_interface.rs：调用了c&#43;&#43;的rust代码 –outdir：输出文件夹 –gen-cpp：指定生成c&#43;&#43;胶水层代码 –gen-rs-include：指定生成rust胶水层代码 –inc：按需指定依赖的各个头文件路径">
+  <meta property="og:locale" content="en_us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="post">
+    <meta property="article:tag" content="Tech/Bazel">
+    <meta property="article:tag" content="Tech/Rust">
+    <meta property="article:tag" content="非原创">
+    <meta property="article:tag" content="Blog">
+<title>使用bazel编译rust项目 | Manchey Blog</title>
+<link rel="icon" href="http://localhost:1313/logo.png" >
+<link rel="manifest" href="http://localhost:1313/manifest.json">
+<link rel="canonical" href="http://localhost:1313/posts/1/01/%E4%BD%BF%E7%94%A8bazel%E7%BC%96%E8%AF%91rust%E9%A1%B9%E7%9B%AE/">
+<link rel="stylesheet" href="http://localhost:1313/book.min.2d11051f9bbf9eb3c1e80b2b7a60b21379d1b88bdcc5a0c2b268ec9357d72f50.css" integrity="sha256-LREFH5u/nrPB6AsremCyE3nRuIvcxaDCsmjsk1fXL1A=" crossorigin="anonymous">
+  <script defer src="http://localhost:1313/fuse.min.js"></script>
+  <script defer src="http://localhost:1313/en.search.min.202c599dd138229b73a70f5225b51f437018d651488c03ce5fe7f358c1e67f0d.js" integrity="sha256-ICxZndE4Iptzpw9SJbUfQ3AY1lFIjAPOX&#43;fzWMHmfw0=" crossorigin="anonymous"></script>
+<!--
+Made with Book Theme
+https://github.com/alex-shpak/hugo-book
+-->
+  
+</head>
+<body dir="ltr">
+  <input type="checkbox" class="hidden toggle" id="menu-control" />
+  <input type="checkbox" class="hidden toggle" id="toc-control" />
+  <main class="container flex">
+    <aside class="book-menu">
+      <div class="book-menu-content">
+        
+  <nav>
+<h2 class="book-brand">
+  <a class="flex align-center" href="http://localhost:1313/"><img src="http://localhost:1313/logo.png" alt="Logo" class="book-icon" /><span>Manchey Blog</span>
+  </a>
+</h2>
+
+
+<div class="book-search hidden">
+  <input type="text" id="book-search-input" placeholder="Search" aria-label="Search" maxlength="64" data-hotkeys="s/" />
+  <div class="book-search-spinner hidden"></div>
+  <ul id="book-search-results"></ul>
+</div>
+<script>document.querySelector(".book-search").classList.remove("hidden")</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+<ul>
+  
+  <li>
+    <a href="http://localhost:1313/"  >
+        Home
+      </a>
+  </li>
+  
+  <li>
+    <a href="http://localhost:1313/post/"  >
+        Blog
+      </a>
+  </li>
+  
+  <li>
+    <a href="http://localhost:1313/about/"  >
+        About
+      </a>
+  </li>
+  
+  <li>
+    <a href="https://github.com/Manchey/manchey.github.io"  target="_blank" rel="noopener">
+        Github
+      </a>
+  </li>
+  
+</ul>
+
+
+
+
+
+
+</nav>
+
+
+
+
+  <script>(function(){var e=document.querySelector("aside .book-menu-content");addEventListener("beforeunload",function(){localStorage.setItem("menu.scrollTop",e.scrollTop)}),e.scrollTop=localStorage.getItem("menu.scrollTop")})()</script>
+
+
+ 
+      </div>
+    </aside>
+
+    <div class="book-page">
+      <header class="book-header">
+        
+  <div class="flex align-center justify-between">
+  <label for="menu-control">
+    <img src="http://localhost:1313/svg/menu.svg" class="book-icon" alt="Menu" />
+  </label>
+
+  <h3>使用bazel编译rust项目</h3>
+
+  <label for="toc-control">
+    
+    <img src="http://localhost:1313/svg/toc.svg" class="book-icon" alt="Table of Contents" />
+    
+  </label>
+</div>
+
+
+  
+  <aside class="hidden clearfix">
+    
+  
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#1加入rules_rust">1）加入rules_rust</a></li>
+    <li><a href="#2设置外部依赖">2）设置外部依赖</a></li>
+    <li><a href="#3添加target规则">3）添加target规则</a></li>
+  </ul>
+
+  <ul>
+    <li><a href="#生成过程">生成过程</a></li>
+  </ul>
+</nav>
+
+
+
+  </aside>
+  
+ 
+      </header>
+
+      
+      
+  <article class="markdown book-article"><h1 id="编译适配">
+  编译适配
+  <a class="anchor" href="#%e7%bc%96%e8%af%91%e9%80%82%e9%85%8d">#</a>
+</h1>
+<p>主要参考：https://www.tweag.io/blog/2023-07-27-building-rust-workspace-with-bazel/</p>
+<h2 id="1加入rules_rust">
+  1）加入rules_rust
+  <a class="anchor" href="#1%e5%8a%a0%e5%85%a5rules_rust">#</a>
+</h2>
+<p>在WORKSPACE中加入：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>http_archive(
+</span></span><span style="display:flex;"><span>    name <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;rules_rust&#34;</span>,
+</span></span><span style="display:flex;"><span>    sha256 <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;36ab8f9facae745c9c9c1b33d225623d976e78f2cc3f729b7973d8c20934ab95&#34;</span>,
+</span></span><span style="display:flex;"><span>    urls <span style="color:#f92672">=</span> [<span style="color:#e6db74">&#34;https://github.com/bazelbuild/rules_rust/releases/download/0.31.0/rules_rust-v0.31.0.tar.gz&#34;</span>    ],
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>load(<span style="color:#e6db74">&#34;@rules_rust//rust:repositories.bzl&#34;</span>, <span style="color:#e6db74">&#34;rules_rust_dependencies&#34;</span>, <span style="color:#e6db74">&#34;rust_register_toolchains&#34;</span>)
+</span></span><span style="display:flex;"><span>rules_rust_dependencies()
+</span></span><span style="display:flex;"><span>rust_register_toolchains()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 声明使用的rust版本，最新的是2024，我选了一个次新的</span>
+</span></span><span style="display:flex;"><span>rust_register_toolchains(
+</span></span><span style="display:flex;"><span>    edition <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;2021&#34;</span>,
+</span></span><span style="display:flex;"><span>)
+</span></span></code></pre></div><h2 id="2设置外部依赖">
+  2）设置外部依赖
+  <a class="anchor" href="#2%e8%ae%be%e7%bd%ae%e5%a4%96%e9%83%a8%e4%be%9d%e8%b5%96">#</a>
+</h2>
+<p>添加外部依赖，在WORKSPACE中添加：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>load(<span style="color:#e6db74">&#34;@rules_rust//crate_universe:repositories.bzl&#34;</span>, <span style="color:#e6db74">&#34;crate_universe_dependencies&#34;</span>)
+</span></span><span style="display:flex;"><span>crate_universe_dependencies()
+</span></span><span style="display:flex;"><span>load(<span style="color:#e6db74">&#34;@rules_rust//crate_universe:defs.bzl&#34;</span>, <span style="color:#e6db74">&#34;crates_repository&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>crates_repository(
+</span></span><span style="display:flex;"><span>    name <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;crate_index&#34;</span>,
+</span></span><span style="display:flex;"><span>    cargo_lockfile <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;//xxx_tool:Cargo.lock&#34;</span>,
+</span></span><span style="display:flex;"><span>    lockfile <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;//:cargo-bazel-lock.json&#34;</span>,
+</span></span><span style="display:flex;"><span>    manifests <span style="color:#f92672">=</span> [
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;//xxx_tool:Cargo.toml&#34;</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;//xxx_tool/common:Cargo.toml&#34;</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;//xxx_tool/xxx_monitor:Cargo.toml&#34;</span>,
+</span></span><span style="display:flex;"><span>    ],
+</span></span><span style="display:flex;"><span>    generate_build_scripts <span style="color:#f92672">=</span> <span style="color:#66d9ef">True</span>,
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>load(<span style="color:#e6db74">&#34;@crate_index//:defs.bzl&#34;</span>, <span style="color:#e6db74">&#34;crate_repositories&#34;</span>)
+</span></span><span style="display:flex;"><span>crate_repositories()
+</span></span></code></pre></div><p>必须先执行一下：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>touch cargo-bazel-lock.json
+</span></span><span style="display:flex;"><span>CARGO_BAZEL_REPIN<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span> bazel sync --only<span style="color:#f92672">=</span>crate_index
+</span></span></code></pre></div><p>执行上述命令会读取Cargo.toml和Cargo.lock，并将依赖信息写到cargo-bazel-lock.json中，通过bazel命令可以查询具体包含了哪些依赖：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>bazel query @crate_index//...
+</span></span></code></pre></div><h2 id="3添加target规则">
+  3）添加target规则
+  <a class="anchor" href="#3%e6%b7%bb%e5%8a%a0target%e8%a7%84%e5%88%99">#</a>
+</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>package(default_visibility <span style="color:#f92672">=</span> [<span style="color:#e6db74">&#34;//visibility:public&#34;</span>])
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>load(<span style="color:#e6db74">&#34;@rules_rust//rust:defs.bzl&#34;</span>, <span style="color:#e6db74">&#34;rust_library&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>rust_library(
+</span></span><span style="display:flex;"><span>    name <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;common&#34;</span>,
+</span></span><span style="display:flex;"><span>    srcs <span style="color:#f92672">=</span> glob([
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;src/**/*.rs&#34;</span>,
+</span></span><span style="display:flex;"><span>    ]),
+</span></span><span style="display:flex;"><span>    edition <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;2021&#34;</span>,
+</span></span><span style="display:flex;"><span>    deps <span style="color:#f92672">=</span> [
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;@crate_index//:chrono&#34;</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;@crate_index//:lazy_static&#34;</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;@crate_index//:log&#34;</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;@crate_index//:log4rs&#34;</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;@crate_index//:nix&#34;</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;@crate_index//:serde&#34;</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;@crate_index//:tokio&#34;</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;@crate_index//:uname&#34;</span>,
+</span></span><span style="display:flex;"><span>    ],
+</span></span><span style="display:flex;"><span>    proc_macro_deps <span style="color:#f92672">=</span> [
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;@crate_index//:serde_derive&#34;</span>,
+</span></span><span style="display:flex;"><span>    ],
+</span></span><span style="display:flex;"><span>)
+</span></span></code></pre></div><h1 id="rust-call-c编译问题">
+  Rust call c++编译问题
+  <a class="anchor" href="#rust-call-c%e7%bc%96%e8%af%91%e9%97%ae%e9%a2%98">#</a>
+</h1>
+<ul>
+<li>rust调用c++代码，一般几种方式：cxx、autocxx、bindgen
+<ul>
+<li>此前用的autocxx，相对来说是最方便使用的，不需要自己手动写大量的胶水层代码</li>
+</ul>
+</li>
+<li>autocxx本身目前没有现成的bazel方案，但一些开源相关工作可以参考：
+<ul>
+<li>autocxx仓库的bazel PR：https://github.com/google/autocxx/pull/1255</li>
+<li>有一个开源库，自己做了autocxx的bazel集成：https://github.com/frc971/971-Robot-Code/blob/main/tools/build_rules/autocxx.bzl</li>
+</ul>
+</li>
+<li>autocxx的原理介绍：
+<ul>
+<li><a href="https://google.github.io/autocxx/building.html">https://google.github.io/autocxx/building.html</a></li>
+<li>重点是通过autocxx-gen工具，生成对应的cpp/rs胶水层代码并编译。</li>
+<li>之前的build.rs脚本中autocxx提供的函数其实就是封装了这一过程。</li>
+</ul>
+</li>
+</ul>
+<h2 id="生成过程">
+  生成过程
+  <a class="anchor" href="#%e7%94%9f%e6%88%90%e8%bf%87%e7%a8%8b">#</a>
+</h2>
+<ol>
+<li>先把依赖的几个proto编译一下，把头文件生成出来。</li>
+<li>然后执行autocxx-gen</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>autocxx-gen ./xxx.rs <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>            --outdir ./test-output/ <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>            --gen-cpp <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>            --gen-rs-include <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>            --inc ./ <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>            --inc ./bazel-bin <span style="color:#ae81ff">\
+</span></span></span></code></pre></div><ul>
+<li>参数解释：
+<ul>
+<li>cpp_interface.rs：调用了c++的rust代码</li>
+<li>&ndash;outdir：输出文件夹</li>
+<li>&ndash;gen-cpp：指定生成c++胶水层代码</li>
+<li>&ndash;gen-rs-include：指定生成rust胶水层代码</li>
+<li>&ndash;inc：按需指定依赖的各个头文件路径</li>
+</ul>
+</li>
+</ul>
+</article>
+ 
+      
+
+      <footer class="book-footer">
+        
+  <div class="flex flex-wrap justify-between">
+
+
+
+
+
+</div>
+
+
+
+  <script>(function(){function e(e){const t=window.getSelection(),n=document.createRange();n.selectNodeContents(e),t.removeAllRanges(),t.addRange(n)}document.querySelectorAll("pre code").forEach(t=>{t.addEventListener("click",function(){if(window.getSelection().toString())return;e(t.parentElement),navigator.clipboard&&navigator.clipboard.writeText(t.parentElement.textContent)})})})()</script>
+
+
+ 
+        
+      </footer>
+
+      
+  
+  <div class="book-comments">
+
+</div>
+  
+ 
+
+      <label for="menu-control" class="hidden book-menu-overlay"></label>
+    </div>
+
+    
+    <aside class="book-toc">
+      <div class="book-toc-content">
+        
+  
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#1加入rules_rust">1）加入rules_rust</a></li>
+    <li><a href="#2设置外部依赖">2）设置外部依赖</a></li>
+    <li><a href="#3添加target规则">3）添加target规则</a></li>
+  </ul>
+
+  <ul>
+    <li><a href="#生成过程">生成过程</a></li>
+  </ul>
+</nav>
+
+
+ 
+      </div>
+    </aside>
+    
+  </main>
+
+  
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+

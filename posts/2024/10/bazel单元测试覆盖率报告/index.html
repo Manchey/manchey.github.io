@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="
+  流程
+  #
+
+
+  BUILD file
+  #
+
+cc_test(
+    name = &#34;mutex_test&#34;,
+    srcs = [&#34;test_mutex.cpp&#34;],
+    deps = [
+        &#34;:mutex_lib&#34;,
+        &#34;@gtest//:gtest_main&#34;,
+        &#34;@gtest//:gtest&#34;,
+    ],
+    copts = [&#34;-g&#34;],  # Optional: include debug symbols for better coverage report
+)
+
+  编译运行
+  #
+
+bazel coverage --combined_report=lcov \
+               --action_env=COVERAGE_GCOV_OPTIONS=-b \
+               --collect_code_coverage \
+               --instrument_test_targets \
+               --cache_test_results=no \
+               --sandbox_writable_path=/ \
+               --instrumentation_filter=//src:... \
+       //...
+
+--combined_report=lcov :
+
+指定生成的覆盖率报告格式为 LCOV，这是一个广泛使用的文本格式，便于进一步处理和可视化。
+
+
+--action_env=COVERAGE_GCOV_OPTIONS=-b :
+
+设置环境变量 COVERAGE_GCOV_OPTIONS，并传递 -b 选项给 gcov。-b 选项用于告诉 gcov 包含分支信息，有助于生成更详细的覆盖率数据。
+
+
+--collect_code_coverage :
+
+启用代码覆盖率收集，确保 Bazel 在运行测试时生成必要的覆盖率数据。
+
+
+--instrument_test_targets :
+
+确保所有测试目标在执行时都被插装，以便收集覆盖率信息。
+
+
+--cache_test_results=no :
+
+禁用测试结果缓存。这意味着每次运行测试时，Bazel 都会重新执行测试，而不是使用之前的结果。这在调试和覆盖率分析时特别有用。
+
+
+--sandbox_writable_path=/ :
+
+指定在沙箱中可写的路径。这个选项允许测试在沙箱环境中写入指定的路径，通常用于需要写入文件的测试。
+
+
+--instrumentation_filter=//src:... :
+
+设定插装过滤器，指示 Bazel 仅对匹配该模式的目标进行插装。在这里，//src:... 表示所有在 src 目录下的目标。可以帮助限制覆盖率分析的范围。
+
+
+
+ps: 如果依赖LD_LIBRARY_PATH才能运行，可以通过：--test_env=LD_LIBRARY_PATH=$LD_LIBRARY_PATH 来添加">
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#343a40">
+<meta name="color-scheme" content="light dark"><meta property="og:url" content="http://localhost:1313/posts/2024/10/bazel%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95%E8%A6%86%E7%9B%96%E7%8E%87%E6%8A%A5%E5%91%8A/">
+  <meta property="og:site_name" content="Manchey Blog">
+  <meta property="og:title" content="bazel单元测试覆盖率报告">
+  <meta property="og:description" content="流程 # BUILD file # cc_test( name = &#34;mutex_test&#34;, srcs = [&#34;test_mutex.cpp&#34;], deps = [ &#34;:mutex_lib&#34;, &#34;@gtest//:gtest_main&#34;, &#34;@gtest//:gtest&#34;, ], copts = [&#34;-g&#34;], # Optional: include debug symbols for better coverage report ) 编译运行 # bazel coverage --combined_report=lcov \ --action_env=COVERAGE_GCOV_OPTIONS=-b \ --collect_code_coverage \ --instrument_test_targets \ --cache_test_results=no \ --sandbox_writable_path=/ \ --instrumentation_filter=//src:... \ //... --combined_report=lcov : 指定生成的覆盖率报告格式为 LCOV，这是一个广泛使用的文本格式，便于进一步处理和可视化。 --action_env=COVERAGE_GCOV_OPTIONS=-b : 设置环境变量 COVERAGE_GCOV_OPTIONS，并传递 -b 选项给 gcov。-b 选项用于告诉 gcov 包含分支信息，有助于生成更详细的覆盖率数据。 --collect_code_coverage : 启用代码覆盖率收集，确保 Bazel 在运行测试时生成必要的覆盖率数据。 --instrument_test_targets : 确保所有测试目标在执行时都被插装，以便收集覆盖率信息。 --cache_test_results=no : 禁用测试结果缓存。这意味着每次运行测试时，Bazel 都会重新执行测试，而不是使用之前的结果。这在调试和覆盖率分析时特别有用。 --sandbox_writable_path=/ : 指定在沙箱中可写的路径。这个选项允许测试在沙箱环境中写入指定的路径，通常用于需要写入文件的测试。 --instrumentation_filter=//src:... : 设定插装过滤器，指示 Bazel 仅对匹配该模式的目标进行插装。在这里，//src:... 表示所有在 src 目录下的目标。可以帮助限制覆盖率分析的范围。 ps: 如果依赖LD_LIBRARY_PATH才能运行，可以通过：--test_env=LD_LIBRARY_PATH=$LD_LIBRARY_PATH 来添加">
+  <meta property="og:locale" content="en_us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="post">
+    <meta property="article:published_time" content="2024-10-22T00:00:00+00:00">
+    <meta property="article:modified_time" content="2024-10-22T00:00:00+00:00">
+    <meta property="article:tag" content="Tech/Bazel">
+    <meta property="article:tag" content="Tech/Cpp">
+    <meta property="article:tag" content="非原创">
+    <meta property="article:tag" content="Blog">
+<title>bazel单元测试覆盖率报告 | Manchey Blog</title>
+<link rel="icon" href="http://localhost:1313/logo.png" >
+<link rel="manifest" href="http://localhost:1313/manifest.json">
+<link rel="canonical" href="http://localhost:1313/posts/2024/10/bazel%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95%E8%A6%86%E7%9B%96%E7%8E%87%E6%8A%A5%E5%91%8A/">
+<link rel="stylesheet" href="http://localhost:1313/book.min.2d11051f9bbf9eb3c1e80b2b7a60b21379d1b88bdcc5a0c2b268ec9357d72f50.css" integrity="sha256-LREFH5u/nrPB6AsremCyE3nRuIvcxaDCsmjsk1fXL1A=" crossorigin="anonymous">
+  <script defer src="http://localhost:1313/fuse.min.js"></script>
+  <script defer src="http://localhost:1313/en.search.min.41873f4a8e861b1c2598929dd6c471abbce53c920d7f4046a555c40b88d9374c.js" integrity="sha256-QYc/So6GGxwlmJKd1sRxq7zlPJINf0BGpVXEC4jZN0w=" crossorigin="anonymous"></script>
+<!--
+Made with Book Theme
+https://github.com/alex-shpak/hugo-book
+-->
+  
+</head>
+<body dir="ltr">
+  <input type="checkbox" class="hidden toggle" id="menu-control" />
+  <input type="checkbox" class="hidden toggle" id="toc-control" />
+  <main class="container flex">
+    <aside class="book-menu">
+      <div class="book-menu-content">
+        
+  <nav>
+<h2 class="book-brand">
+  <a class="flex align-center" href="http://localhost:1313/"><img src="http://localhost:1313/logo.png" alt="Logo" class="book-icon" /><span>Manchey Blog</span>
+  </a>
+</h2>
+
+
+<div class="book-search hidden">
+  <input type="text" id="book-search-input" placeholder="Search" aria-label="Search" maxlength="64" data-hotkeys="s/" />
+  <div class="book-search-spinner hidden"></div>
+  <ul id="book-search-results"></ul>
+</div>
+<script>document.querySelector(".book-search").classList.remove("hidden")</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+<ul>
+  
+  <li>
+    <a href="http://localhost:1313/"  >
+        Home
+      </a>
+  </li>
+  
+  <li>
+    <a href="http://localhost:1313/post/"  >
+        Blog
+      </a>
+  </li>
+  
+  <li>
+    <a href="http://localhost:1313/about/"  >
+        About
+      </a>
+  </li>
+  
+  <li>
+    <a href="https://github.com/Manchey/manchey.github.io"  target="_blank" rel="noopener">
+        Github
+      </a>
+  </li>
+  
+</ul>
+
+
+
+
+
+
+</nav>
+
+
+
+
+  <script>(function(){var e=document.querySelector("aside .book-menu-content");addEventListener("beforeunload",function(){localStorage.setItem("menu.scrollTop",e.scrollTop)}),e.scrollTop=localStorage.getItem("menu.scrollTop")})()</script>
+
+
+ 
+      </div>
+    </aside>
+
+    <div class="book-page">
+      <header class="book-header">
+        
+  <div class="flex align-center justify-between">
+  <label for="menu-control">
+    <img src="http://localhost:1313/svg/menu.svg" class="book-icon" alt="Menu" />
+  </label>
+
+  <h3>bazel单元测试覆盖率报告</h3>
+
+  <label for="toc-control">
+    
+    <img src="http://localhost:1313/svg/toc.svg" class="book-icon" alt="Table of Contents" />
+    
+  </label>
+</div>
+
+
+  
+  <aside class="hidden clearfix">
+    
+  
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#build-file">BUILD file</a></li>
+    <li><a href="#编译运行">编译运行</a></li>
+    <li><a href="#生成报告">生成报告</a></li>
+  </ul>
+
+  <ul>
+    <li><a href="#单元测试用例依赖外部数据配置文件">单元测试用例依赖外部数据/配置文件</a></li>
+    <li><a href="#单元测试用例需要写文件">单元测试用例需要写文件</a></li>
+    <li><a href="#覆盖率报告中不含branches数据">覆盖率报告中不含branches数据</a></li>
+  </ul>
+</nav>
+
+
+
+  </aside>
+  
+ 
+      </header>
+
+      
+      
+  <article class="markdown book-article"><h1 id="流程">
+  流程
+  <a class="anchor" href="#%e6%b5%81%e7%a8%8b">#</a>
+</h1>
+<h2 id="build-file">
+  BUILD file
+  <a class="anchor" href="#build-file">#</a>
+</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>cc_test(
+</span></span><span style="display:flex;"><span>    name <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;mutex_test&#34;</span>,
+</span></span><span style="display:flex;"><span>    srcs <span style="color:#f92672">=</span> [<span style="color:#e6db74">&#34;test_mutex.cpp&#34;</span>],
+</span></span><span style="display:flex;"><span>    deps <span style="color:#f92672">=</span> [
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;:mutex_lib&#34;</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;@gtest//:gtest_main&#34;</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;@gtest//:gtest&#34;</span>,
+</span></span><span style="display:flex;"><span>    ],
+</span></span><span style="display:flex;"><span>    copts <span style="color:#f92672">=</span> [<span style="color:#e6db74">&#34;-g&#34;</span>],  <span style="color:#75715e"># Optional: include debug symbols for better coverage report</span>
+</span></span><span style="display:flex;"><span>)
+</span></span></code></pre></div><h2 id="编译运行">
+  编译运行
+  <a class="anchor" href="#%e7%bc%96%e8%af%91%e8%bf%90%e8%a1%8c">#</a>
+</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>bazel coverage --combined_report<span style="color:#f92672">=</span>lcov <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>               --action_env<span style="color:#f92672">=</span>COVERAGE_GCOV_OPTIONS<span style="color:#f92672">=</span>-b <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>               --collect_code_coverage <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>               --instrument_test_targets <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>               --cache_test_results<span style="color:#f92672">=</span>no <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>               --sandbox_writable_path<span style="color:#f92672">=</span>/ <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>               --instrumentation_filter<span style="color:#f92672">=</span>//src:... <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>       //...
+</span></span></code></pre></div><ul>
+<li><strong><code>--combined_report=lcov</code></strong> :
+<ul>
+<li>指定生成的覆盖率报告格式为 LCOV，这是一个广泛使用的文本格式，便于进一步处理和可视化。</li>
+</ul>
+</li>
+<li><strong><code>--action_env=COVERAGE_GCOV_OPTIONS=-b</code></strong> :
+<ul>
+<li>设置环境变量 <code>COVERAGE_GCOV_OPTIONS</code>，并传递 <code>-b</code> 选项给 <code>gcov</code>。<code>-b</code> 选项用于告诉 <code>gcov</code> 包含分支信息，有助于生成更详细的覆盖率数据。</li>
+</ul>
+</li>
+<li><strong><code>--collect_code_coverage</code></strong> :
+<ul>
+<li>启用代码覆盖率收集，确保 Bazel 在运行测试时生成必要的覆盖率数据。</li>
+</ul>
+</li>
+<li><strong><code>--instrument_test_targets</code></strong> :
+<ul>
+<li>确保所有测试目标在执行时都被插装，以便收集覆盖率信息。</li>
+</ul>
+</li>
+<li><strong><code>--cache_test_results=no</code></strong> :
+<ul>
+<li>禁用测试结果缓存。这意味着每次运行测试时，Bazel 都会重新执行测试，而不是使用之前的结果。这在调试和覆盖率分析时特别有用。</li>
+</ul>
+</li>
+<li><strong><code>--sandbox_writable_path=/</code></strong> :
+<ul>
+<li>指定在沙箱中可写的路径。这个选项允许测试在沙箱环境中写入指定的路径，通常用于需要写入文件的测试。</li>
+</ul>
+</li>
+<li><strong><code>--instrumentation_filter=//src:...</code></strong> :
+<ul>
+<li>设定插装过滤器，指示 Bazel 仅对匹配该模式的目标进行插装。在这里，<code>//src:...</code> 表示所有在 <code>src</code> 目录下的目标。可以帮助限制覆盖率分析的范围。</li>
+</ul>
+</li>
+</ul>
+<p>ps: 如果依赖LD_LIBRARY_PATH才能运行，可以通过：<code>--test_env=LD_LIBRARY_PATH=$LD_LIBRARY_PATH</code> 来添加</p>
+<h2 id="生成报告">
+  生成报告
+  <a class="anchor" href="#%e7%94%9f%e6%88%90%e6%8a%a5%e5%91%8a">#</a>
+</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># apt update &amp;&amp; apt install -y lcov</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>genhtml --branch-coverage --output report <span style="color:#e6db74">&#34;</span><span style="color:#66d9ef">$(</span>bazel info output_path<span style="color:#66d9ef">)</span><span style="color:#e6db74">/_coverage/_coverage_report.dat&#34;</span>
+</span></span></code></pre></div><h1 id="reference">
+  Reference
+  <a class="anchor" href="#reference">#</a>
+</h1>
+<h2 id="单元测试用例依赖外部数据配置文件">
+  单元测试用例依赖外部数据/配置文件
+  <a class="anchor" href="#%e5%8d%95%e5%85%83%e6%b5%8b%e8%af%95%e7%94%a8%e4%be%8b%e4%be%9d%e8%b5%96%e5%a4%96%e9%83%a8%e6%95%b0%e6%8d%ae%e9%85%8d%e7%bd%ae%e6%96%87%e4%bb%b6">#</a>
+</h2>
+<p>当单元测试用例依赖外部数据、配置文件时，需要在cc_test中添加data字段，否则，单元测试过程中会找不到配置文件/数据，如下所示：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>cc_test(
+</span></span><span style="display:flex;"><span>    name <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;safety_test&#34;</span>,
+</span></span><span style="display:flex;"><span>    srcs <span style="color:#f92672">=</span> [
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;main_test.cpp&#34;</span>,
+</span></span><span style="display:flex;"><span>    ],
+</span></span><span style="display:flex;"><span>    deps <span style="color:#f92672">=</span> [
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;:safety_test_lib&#34;</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;@gtest//:gtest_main&#34;</span>,
+</span></span><span style="display:flex;"><span>    ],
+</span></span><span style="display:flex;"><span>    data <span style="color:#f92672">=</span> [
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;//test/config:test_configs&#34;</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;//test/test_data:test_data&#34;</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;//config:config_files&#34;</span>,
+</span></span><span style="display:flex;"><span>        ],
+</span></span><span style="display:flex;"><span>    visibility <span style="color:#f92672">=</span> [<span style="color:#e6db74">&#34;//visibility:public&#34;</span>],
+</span></span><span style="display:flex;"><span>)
+</span></span></code></pre></div><p>ps:测试用例中数据/配置文件路径需要是从workspace目录开始的绝对路径</p>
+<h2 id="单元测试用例需要写文件">
+  单元测试用例需要写文件
+  <a class="anchor" href="#%e5%8d%95%e5%85%83%e6%b5%8b%e8%af%95%e7%94%a8%e4%be%8b%e9%9c%80%e8%a6%81%e5%86%99%e6%96%87%e4%bb%b6">#</a>
+</h2>
+<p>如果单元测试过程中，需要在某路径中进行写文件等操作，需要在bazel coverage中添加&ndash;sandbox_writable_path=/，将需要进行写的目录改为可写路径，要不然会报错：error:Read-only file system</p>
+<h2 id="覆盖率报告中不含branches数据">
+  覆盖率报告中不含branches数据
+  <a class="anchor" href="#%e8%a6%86%e7%9b%96%e7%8e%87%e6%8a%a5%e5%91%8a%e4%b8%ad%e4%b8%8d%e5%90%abbranches%e6%95%b0%e6%8d%ae">#</a>
+</h2>
+<p>生成覆盖率报告的时候，如果报branches&hellip;: no data found，如下所示：</p>
+<p><img src="99_work/assets/103cd7c28ad3f98b2d902bb3353e453b_MD5.png" alt="1729650250318" /></p>
+<p>参考：<a href="https://github.com/bazelbuild/bazel/issues/13919">https://github.com/bazelbuild/bazel/issues/13919</a></p>
+<p>需要在bazel coverage时添加环境变量&ndash;action_env=COVERAGE_GCOV_OPTIONS=-b启用分支覆盖率：</p>
+<p><img src="99_work/assets/00b91b5425fb48c0251de90caf5a44b8_MD5.png" alt="1729650268479" /></p>
+</article>
+ 
+      
+
+      <footer class="book-footer">
+        
+  <div class="flex flex-wrap justify-between">
+
+
+
+
+
+</div>
+
+
+
+  <script>(function(){function e(e){const t=window.getSelection(),n=document.createRange();n.selectNodeContents(e),t.removeAllRanges(),t.addRange(n)}document.querySelectorAll("pre code").forEach(t=>{t.addEventListener("click",function(){if(window.getSelection().toString())return;e(t.parentElement),navigator.clipboard&&navigator.clipboard.writeText(t.parentElement.textContent)})})})()</script>
+
+
+ 
+        
+      </footer>
+
+      
+  
+  <div class="book-comments">
+
+</div>
+  
+ 
+
+      <label for="menu-control" class="hidden book-menu-overlay"></label>
+    </div>
+
+    
+    <aside class="book-toc">
+      <div class="book-toc-content">
+        
+  
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#build-file">BUILD file</a></li>
+    <li><a href="#编译运行">编译运行</a></li>
+    <li><a href="#生成报告">生成报告</a></li>
+  </ul>
+
+  <ul>
+    <li><a href="#单元测试用例依赖外部数据配置文件">单元测试用例依赖外部数据/配置文件</a></li>
+    <li><a href="#单元测试用例需要写文件">单元测试用例需要写文件</a></li>
+    <li><a href="#覆盖率报告中不含branches数据">覆盖率报告中不含branches数据</a></li>
+  </ul>
+</nav>
+
+
+ 
+      </div>
+    </aside>
+    
+  </main>
+
+  
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+

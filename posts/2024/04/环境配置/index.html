@@ -1,0 +1,1116 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="{% raw %}
+
+  mac环境
+  #
+
+
+  整理launcher
+  #
+
+defaults write com.apple.dock ResetLaunchPad -bool true &amp;&amp; killall Dock 
+
+  iterm2快捷键
+  #
+
+【command &#43; 数字 command &#43; 左右方向键】切换标签
+【command &#43; f】查找
+【command &#43; d】垂直分屏
+【command &#43; shift &#43; d】水平分屏
+【command &#43; option &#43; 方向键 command &#43; [或 command &#43;] 】切换屏幕
+【command &#43; ;】查看历史命令
+【command &#43; shift &#43; h】查看剪贴板历史
+【ctrl &#43; u】清除当前行
+【ctrl &#43; l】清屏
+【ctrl &#43; f/b】 前进后退
+【ctrl &#43; p】 上一条命令">
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#343a40">
+<meta name="color-scheme" content="light dark"><meta property="og:url" content="http://localhost:1313/posts/2024/04/%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE/">
+  <meta property="og:site_name" content="Manchey Blog">
+  <meta property="og:title" content="环境配置">
+  <meta property="og:description" content="{% raw %}
+mac环境 # 整理launcher # defaults write com.apple.dock ResetLaunchPad -bool true &amp;&amp; killall Dock iterm2快捷键 # 【command &#43; 数字 command &#43; 左右方向键】切换标签 【command &#43; f】查找 【command &#43; d】垂直分屏 【command &#43; shift &#43; d】水平分屏 【command &#43; option &#43; 方向键 command &#43; [或 command &#43;] 】切换屏幕 【command &#43; ;】查看历史命令 【command &#43; shift &#43; h】查看剪贴板历史 【ctrl &#43; u】清除当前行 【ctrl &#43; l】清屏
+【ctrl &#43; f/b】 前进后退 【ctrl &#43; p】 上一条命令">
+  <meta property="og:locale" content="en_us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="post">
+    <meta property="article:published_time" content="2024-04-12T00:00:00+00:00">
+    <meta property="article:modified_time" content="2024-04-12T00:00:00+00:00">
+    <meta property="article:tag" content="Tech/Misc">
+    <meta property="article:tag" content="Blog">
+<title>环境配置 | Manchey Blog</title>
+<link rel="icon" href="http://localhost:1313/logo.png" >
+<link rel="manifest" href="http://localhost:1313/manifest.json">
+<link rel="canonical" href="http://localhost:1313/posts/2024/04/%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE/">
+<link rel="stylesheet" href="http://localhost:1313/book.min.2d11051f9bbf9eb3c1e80b2b7a60b21379d1b88bdcc5a0c2b268ec9357d72f50.css" integrity="sha256-LREFH5u/nrPB6AsremCyE3nRuIvcxaDCsmjsk1fXL1A=" crossorigin="anonymous">
+  <script defer src="http://localhost:1313/fuse.min.js"></script>
+  <script defer src="http://localhost:1313/en.search.min.41873f4a8e861b1c2598929dd6c471abbce53c920d7f4046a555c40b88d9374c.js" integrity="sha256-QYc/So6GGxwlmJKd1sRxq7zlPJINf0BGpVXEC4jZN0w=" crossorigin="anonymous"></script>
+<!--
+Made with Book Theme
+https://github.com/alex-shpak/hugo-book
+-->
+  
+</head>
+<body dir="ltr">
+  <input type="checkbox" class="hidden toggle" id="menu-control" />
+  <input type="checkbox" class="hidden toggle" id="toc-control" />
+  <main class="container flex">
+    <aside class="book-menu">
+      <div class="book-menu-content">
+        
+  <nav>
+<h2 class="book-brand">
+  <a class="flex align-center" href="http://localhost:1313/"><img src="http://localhost:1313/logo.png" alt="Logo" class="book-icon" /><span>Manchey Blog</span>
+  </a>
+</h2>
+
+
+<div class="book-search hidden">
+  <input type="text" id="book-search-input" placeholder="Search" aria-label="Search" maxlength="64" data-hotkeys="s/" />
+  <div class="book-search-spinner hidden"></div>
+  <ul id="book-search-results"></ul>
+</div>
+<script>document.querySelector(".book-search").classList.remove("hidden")</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+<ul>
+  
+  <li>
+    <a href="http://localhost:1313/"  >
+        Home
+      </a>
+  </li>
+  
+  <li>
+    <a href="http://localhost:1313/post/"  >
+        Blog
+      </a>
+  </li>
+  
+  <li>
+    <a href="http://localhost:1313/about/"  >
+        About
+      </a>
+  </li>
+  
+  <li>
+    <a href="https://github.com/Manchey/manchey.github.io"  target="_blank" rel="noopener">
+        Github
+      </a>
+  </li>
+  
+</ul>
+
+
+
+
+
+
+</nav>
+
+
+
+
+  <script>(function(){var e=document.querySelector("aside .book-menu-content");addEventListener("beforeunload",function(){localStorage.setItem("menu.scrollTop",e.scrollTop)}),e.scrollTop=localStorage.getItem("menu.scrollTop")})()</script>
+
+
+ 
+      </div>
+    </aside>
+
+    <div class="book-page">
+      <header class="book-header">
+        
+  <div class="flex align-center justify-between">
+  <label for="menu-control">
+    <img src="http://localhost:1313/svg/menu.svg" class="book-icon" alt="Menu" />
+  </label>
+
+  <h3>环境配置</h3>
+
+  <label for="toc-control">
+    
+    <img src="http://localhost:1313/svg/toc.svg" class="book-icon" alt="Table of Contents" />
+    
+  </label>
+</div>
+
+
+  
+  <aside class="hidden clearfix">
+    
+  
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#整理launcher">整理launcher</a></li>
+    <li><a href="#iterm2快捷键">iterm2快捷键</a></li>
+    <li><a href="#python">python</a>
+      <ul>
+        <li><a href="#pyenv">pyenv</a></li>
+      </ul>
+    </li>
+  </ul>
+
+  <ul>
+    <li><a href="#settingsjson">settings.json</a>
+      <ul>
+        <li><a href="#vim">vim</a></li>
+        <li><a href="#scrollbeyondlastline">scrollBeyondLastLine</a></li>
+        <li><a href="#go-forward--go-back">go forward / go back</a></li>
+      </ul>
+    </li>
+    <li><a href="#插件">插件</a></li>
+    <li><a href="#通过vscode使用docker">通过vscode使用docker</a></li>
+  </ul>
+
+  <ul>
+    <li><a href="#bashrc">bashrc</a>
+      <ul>
+        <li><a href="#ps1">PS1</a></li>
+        <li><a href="#时区">时区</a></li>
+      </ul>
+    </li>
+    <li><a href="#gitconfig">gitconfig</a></li>
+    <li><a href="#vimrc">vimrc</a></li>
+    <li><a href="#terminator">Terminator</a></li>
+  </ul>
+
+  <ul>
+    <li><a href="#拉取基本镜像">拉取基本镜像</a></li>
+    <li><a href="#安装vim">安装vim</a></li>
+    <li><a href="#切换用户">切换用户</a>
+      <ul>
+        <li><a href="#安装bazel">安装bazel</a></li>
+        <li><a href="#配置ssh">配置ssh</a></li>
+        <li><a href="#安装python">安装python</a></li>
+        <li><a href="#安装各种工具">安装各种工具</a></li>
+        <li><a href="#中文支持ubuntu镜像不带中文ros镜像可以">中文支持，ubuntu镜像不带中文，ros镜像可以</a></li>
+      </ul>
+    </li>
+    <li><a href="#配置-ssh">配置 SSH</a>
+      <ul>
+        <li><a href="#安装-openssh-server">安装 openssh-server</a></li>
+        <li><a href="#配置-sshd">配置 sshd</a></li>
+        <li><a href="#重启-sshd">重启 sshd</a></li>
+        <li><a href="#添加主机的-ssh-公钥">添加主机的 ssh 公钥</a></li>
+        <li><a href="#跳板机配置">跳板机配置</a></li>
+      </ul>
+    </li>
+    <li><a href="#提交修改到镜像">提交修改到镜像</a>
+      <ul>
+        <li><a href="#最终的-ubuntu-容器">最终的 ubuntu 容器</a></li>
+      </ul>
+    </li>
+    <li><a href="#开发环境">开发环境</a>
+      <ul>
+        <li><a href="#安装ros">安装ros</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+
+
+
+  </aside>
+  
+ 
+      </header>
+
+      
+      
+  <article class="markdown book-article"><p>{% raw %}</p>
+<h1 id="mac环境">
+  mac环境
+  <a class="anchor" href="#mac%e7%8e%af%e5%a2%83">#</a>
+</h1>
+<h2 id="整理launcher">
+  整理launcher
+  <a class="anchor" href="#%e6%95%b4%e7%90%86launcher">#</a>
+</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>defaults write com.apple.dock ResetLaunchPad -bool true <span style="color:#f92672">&amp;&amp;</span> killall Dock 
+</span></span></code></pre></div><h2 id="iterm2快捷键">
+  iterm2快捷键
+  <a class="anchor" href="#iterm2%e5%bf%ab%e6%8d%b7%e9%94%ae">#</a>
+</h2>
+<p>【command + 数字 command + 左右方向键】切换标签
+【command + f】查找
+【command + d】垂直分屏
+【command + shift + d】水平分屏
+【command + option + 方向键 command + [或 command +] 】切换屏幕
+【command + ;】查看历史命令
+【command + shift + h】查看剪贴板历史
+【ctrl + u】清除当前行
+【ctrl + l】清屏</p>
+<p>【ctrl + f/b】 前进后退
+【ctrl + p】 上一条命令</p>
+<p><a href="https://www.jianshu.com/p/a78845c3f476">https://www.jianshu.com/p/a78845c3f476</a></p>
+<ol>
+<li>快捷键cmd+shift+enter，能够将某一个全屏化当前分屏，满足全屏编辑的需求</li>
+</ol>
+<p><strong>搜索及文本复制</strong></p>
+<p>使用“cmd+f”可以调出搜索框进行文本搜索，然后有个很奇妙的快捷键“tab”键，使用它后会自动高亮当前文本后面的内容。最后按enter键将高亮文本复制到剪切板上</p>
+<h2 id="python">
+  python
+  <a class="anchor" href="#python">#</a>
+</h2>
+<h3 id="pyenv">
+  pyenv
+  <a class="anchor" href="#pyenv">#</a>
+</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>mkdir ~/.venv
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>python3 -m venv ~/.venv
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#	Creates the following in ~/.venv</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#		bin/</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#		include/</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#		lib/</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#		pyvenv.cfg</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#		does not create pip-selfcheck.json </span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># to activate the venv</span>
+</span></span><span style="display:flex;"><span>source ~/.venv/bin/activate
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># now you can..</span>
+</span></span><span style="display:flex;"><span>python3 -m pip install &lt;module name&gt;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># and it will install the module in the virtual env</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># to deactivate the venv</span>
+</span></span><span style="display:flex;"><span>deactivate <span style="color:#75715e"># or exit the shell</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># you should see the folder name for the venv below your prompt when active, like so</span>
+</span></span><span style="display:flex;"><span>pstivers3@mbp ~/repos/learn/pythonlearn
+</span></span><span style="display:flex;"><span>$ 
+</span></span><span style="display:flex;"><span><span style="color:#f92672">(</span>.venv<span style="color:#f92672">)</span> 
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Note, you can chose any folder location and name that you want for the venv. ~/.venv is typical.</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Your project code can be in any directory.</span>
+</span></span></code></pre></div><h1 id="vscode">
+  Vscode
+  <a class="anchor" href="#vscode">#</a>
+</h1>
+<h2 id="settingsjson">
+  settings.json
+  <a class="anchor" href="#settingsjson">#</a>
+</h2>
+<h3 id="vim">
+  vim
+  <a class="anchor" href="#vim">#</a>
+</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span><span style="color:#e6db74">&#34;vim.handleKeys&#34;</span><span style="color:#960050;background-color:#1e0010">:</span> {
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;&lt;C-f&gt;&#34;</span>: <span style="color:#66d9ef">false</span>,
+</span></span><span style="display:flex;"><span>}<span style="color:#960050;background-color:#1e0010">,</span>
+</span></span></code></pre></div><h3 id="scrollbeyondlastline">
+  scrollBeyondLastLine
+  <a class="anchor" href="#scrollbeyondlastline">#</a>
+</h3>
+<p>false</p>
+<h3 id="go-forward--go-back">
+  go forward / go back
+  <a class="anchor" href="#go-forward--go-back">#</a>
+</h3>
+<p>keyboard bindings设置</p>
+<h2 id="插件">
+  插件
+  <a class="anchor" href="#%e6%8f%92%e4%bb%b6">#</a>
+</h2>
+<ul>
+<li>Dracula Official</li>
+<li>GitLens</li>
+<li>Vim</li>
+<li>C/C++</li>
+</ul>
+<h2 id="通过vscode使用docker">
+  通过vscode使用docker
+  <a class="anchor" href="#%e9%80%9a%e8%bf%87vscode%e4%bd%bf%e7%94%a8docker">#</a>
+</h2>
+<p>参考：<a href="https://zhuanlan.zhihu.com/p/654973364">https://zhuanlan.zhihu.com/p/654973364</a></p>
+<p><a href="https://code.visualstudio.com/docs/devcontainers/containers">https://code.visualstudio.com/docs/devcontainers/containers</a></p>
+<p>创建 <code>.devcontainer</code>文件夹</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;name&#34;</span>: <span style="color:#e6db74">&#34;c/c++&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;build&#34;</span>: {
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;dockerfile&#34;</span>: <span style="color:#e6db74">&#34;Dockerfile&#34;</span>
+</span></span><span style="display:flex;"><span>  },
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Features to add to the dev container. More info: https://containers.dev/features.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#75715e">// &#34;features&#34;: {},
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Use &#39;forwardPorts&#39; to make a list of ports inside the container available locally.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#75715e">// &#34;forwardPorts&#34;: [],
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Use &#39;postCreateCommand&#39; to run commands after the container is created.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#75715e">// &#34;postCreateCommand&#34;: &#34;gcc -v&#34;,
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Configure tool-specific properties.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#f92672">&#34;customizations&#34;</span>: {
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;vscode&#34;</span>: {
+</span></span><span style="display:flex;"><span>      <span style="color:#75715e">// Add the IDs of extensions you want installed when the container is created.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>      <span style="color:#f92672">&#34;extensions&#34;</span>: [
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;ms-vscode.cpptools&#34;</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;ms-vscode.cmake-tools&#34;</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;ms-python.vscode-pylance&#34;</span>
+</span></span><span style="display:flex;"><span>      ]
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>  },
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#f92672">&#34;remoteUser&#34;</span>: <span style="color:#e6db74">&#34;vscode&#34;</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-dockerfile" data-lang="dockerfile"><span style="display:flex;"><span><span style="color:#66d9ef">FROM</span><span style="color:#e6db74"> devuan/devuan</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">ARG</span> USERNAME<span style="color:#f92672">=</span>vscode
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">ARG</span> USER_UID<span style="color:#f92672">=</span><span style="color:#ae81ff">1000</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">ARG</span> USER_GID<span style="color:#f92672">=</span>$USER_UID<span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e"># Create the user</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> groupadd --gid $USER_GID $USERNAME <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>    <span style="color:#f92672">&amp;&amp;</span> useradd --uid $USER_UID --gid $USER_GID -m $USERNAME <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>    <span style="color:#75715e">#</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span>    <span style="color:#75715e"># [Optional] Add sudo support. Omit if you don&#39;t need to install software after connecting.</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span>    <span style="color:#f92672">&amp;&amp;</span> apt-get update <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>    <span style="color:#f92672">&amp;&amp;</span> apt-get install -y sudo <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>    <span style="color:#f92672">&amp;&amp;</span> echo $USERNAME ALL<span style="color:#f92672">=</span><span style="color:#ae81ff">\(</span>root<span style="color:#ae81ff">\)</span> NOPASSWD:ALL &gt; /etc/sudoers.d/$USERNAME <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>    <span style="color:#f92672">&amp;&amp;</span> chmod <span style="color:#ae81ff">0440</span> /etc/sudoers.d/$USERNAME<span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e"># [Optional] Set the default user. Omit if you want to keep the default as root.</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e"># USER $USERNAME</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> apt-get update <span style="color:#f92672">&amp;&amp;</span> export DEBIAN_FRONTEND<span style="color:#f92672">=</span>noninteractive <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>    <span style="color:#f92672">&amp;&amp;</span> apt-get -y install --no-install-recommends git cmake gdb build-essential clang <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>    clang-tidy clang-format pkg-config glibc-doc tcpdump tshark zsh tmux libreadline-dev<span style="color:#960050;background-color:#1e0010">
+</span></span></span></code></pre></div><h1 id="ubuntu">
+  Ubuntu
+  <a class="anchor" href="#ubuntu">#</a>
+</h1>
+<h2 id="bashrc">
+  bashrc
+  <a class="anchor" href="#bashrc">#</a>
+</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>alias cd<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;new() { cd $1; ls ; }; new&#39;</span>
+</span></span><span style="display:flex;"><span>alias gg<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;new() { grep $1 ./ -r; }; new&#39;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#for git</span>
+</span></span><span style="display:flex;"><span>alias gst<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;git status&#39;</span>
+</span></span><span style="display:flex;"><span>alias gd<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;git diff&#39;</span>
+</span></span><span style="display:flex;"><span>alias gdc<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;git diff --cached&#39;</span>
+</span></span><span style="display:flex;"><span>alias gck<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;git checkout&#39;</span>
+</span></span><span style="display:flex;"><span>alias gb<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;git branch&#39;</span>
+</span></span><span style="display:flex;"><span>alias gpr<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;git pull --rebase&#39;</span>
+</span></span><span style="display:flex;"><span>alias glog<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;git log --graph --pretty=format:&#34;%Cred%h%Creset - %Cgreen(%cD) %C(bold blue)&lt;%an&gt;%Creset %C(yellow)%d%Creset %n%s %n&#34; --abbrev-commit --branches --decorate&#39;</span> 
+</span></span></code></pre></div><h3 id="ps1">
+  PS1
+  <a class="anchor" href="#ps1">#</a>
+</h3>
+<h4 id="tput">
+  tput
+  <a class="anchor" href="#tput">#</a>
+</h4>
+<p><a href="https://linuxcommand.org/lc3_adv_tput.php">https://linuxcommand.org/lc3_adv_tput.php</a></p>
+<h4 id="颜色">
+  颜色
+  <a class="anchor" href="#%e9%a2%9c%e8%89%b2">#</a>
+</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>txtblk<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;\e[0;30m&#39;</span> <span style="color:#75715e"># Black - Regular</span>
+</span></span><span style="display:flex;"><span>txtred<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;\e[0;31m&#39;</span> <span style="color:#75715e"># Red</span>
+</span></span><span style="display:flex;"><span>txtgrn<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;\e[0;32m&#39;</span> <span style="color:#75715e"># Green</span>
+</span></span><span style="display:flex;"><span>txtylw<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;\e[0;33m&#39;</span> <span style="color:#75715e"># Yellow</span>
+</span></span><span style="display:flex;"><span>txtblu<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;\e[0;34m&#39;</span> <span style="color:#75715e"># Blue</span>
+</span></span><span style="display:flex;"><span>txtpur<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;\e[0;35m&#39;</span> <span style="color:#75715e"># Purple</span>
+</span></span><span style="display:flex;"><span>txtcyn<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;\e[0;36m&#39;</span> <span style="color:#75715e"># Cyan</span>
+</span></span><span style="display:flex;"><span>txtwht<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;\e[0;37m&#39;</span> <span style="color:#75715e"># White</span>
+</span></span><span style="display:flex;"><span>bldblk<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;\e[1;30m&#39;</span> <span style="color:#75715e"># Black - Bold</span>
+</span></span><span style="display:flex;"><span>bldred<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;\e[1;31m&#39;</span> <span style="color:#75715e"># Red</span>
+</span></span><span style="display:flex;"><span>bldgrn<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;\e[1;32m&#39;</span> <span style="color:#75715e"># Green</span>
+</span></span><span style="display:flex;"><span>bldylw<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;\e[1;33m&#39;</span> <span style="color:#75715e"># Yellow</span>
+</span></span><span style="display:flex;"><span>bldblu<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;\e[1;34m&#39;</span> <span style="color:#75715e"># Blue</span>
+</span></span><span style="display:flex;"><span>bldpur<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;\e[1;35m&#39;</span> <span style="color:#75715e"># Purple</span>
+</span></span><span style="display:flex;"><span>bldcyn<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;\e[1;36m&#39;</span> <span style="color:#75715e"># Cyan</span>
+</span></span><span style="display:flex;"><span>bldwht<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;\e[1;37m&#39;</span> <span style="color:#75715e"># White</span>
+</span></span><span style="display:flex;"><span>unkblk<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;\e[4;30m&#39;</span> <span style="color:#75715e"># Black - Underline</span>
+</span></span><span style="display:flex;"><span>undred<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;\e[4;31m&#39;</span> <span style="color:#75715e"># Red</span>
+</span></span><span style="display:flex;"><span>undgrn<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;\e[4;32m&#39;</span> <span style="color:#75715e"># Green</span>
+</span></span><span style="display:flex;"><span>undylw<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;\e[4;33m&#39;</span> <span style="color:#75715e"># Yellow</span>
+</span></span><span style="display:flex;"><span>undblu<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;\e[4;34m&#39;</span> <span style="color:#75715e"># Blue</span>
+</span></span><span style="display:flex;"><span>undpur<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;\e[4;35m&#39;</span> <span style="color:#75715e"># Purple</span>
+</span></span><span style="display:flex;"><span>undcyn<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;\e[4;36m&#39;</span> <span style="color:#75715e"># Cyan</span>
+</span></span><span style="display:flex;"><span>undwht<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;\e[4;37m&#39;</span> <span style="color:#75715e"># White</span>
+</span></span><span style="display:flex;"><span>bakblk<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;\e[40m&#39;</span>   <span style="color:#75715e"># Black - Background</span>
+</span></span><span style="display:flex;"><span>bakred<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;\e[41m&#39;</span>   <span style="color:#75715e"># Red</span>
+</span></span><span style="display:flex;"><span>bakgrn<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;\e[42m&#39;</span>   <span style="color:#75715e"># Green</span>
+</span></span><span style="display:flex;"><span>bakylw<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;\e[43m&#39;</span>   <span style="color:#75715e"># Yellow</span>
+</span></span><span style="display:flex;"><span>bakblu<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;\e[44m&#39;</span>   <span style="color:#75715e"># Blue</span>
+</span></span><span style="display:flex;"><span>bakpur<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;\e[45m&#39;</span>   <span style="color:#75715e"># Purple</span>
+</span></span><span style="display:flex;"><span>bakcyn<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;\e[46m&#39;</span>   <span style="color:#75715e"># Cyan</span>
+</span></span><span style="display:flex;"><span>bakwht<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;\e[47m&#39;</span>   <span style="color:#75715e"># White</span>
+</span></span><span style="display:flex;"><span>txtrst<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;\e[0m&#39;</span>    <span style="color:#75715e"># Text Reset</span>
+</span></span></code></pre></div><p><a href="https://askubuntu.com/questions/558280/changing-colour-of-text-and-background-of-terminal">https://askubuntu.com/questions/558280/changing-colour-of-text-and-background-of-terminal</a></p>
+<h5 id="bashrc-color解释">
+  bashrc color解释
+  <a class="anchor" href="#bashrc-color%e8%a7%a3%e9%87%8a">#</a>
+</h5>
+<p>Information as found on this page, excluding preview column:
+Sequences are composed of the Escape character (often represented by ”^[” or ”<!-- raw HTML omitted -->”) followed by some other characters: ”^[FCm” (where FC is one of the numbers in the bulleted list below).
+In bash, the Esc code can be either of the following:</p>
+<ol>
+<li>\e</li>
+<li>\033 (octal)</li>
+<li>\x1B (hexadecimal)
+Note 1: The &ldquo;\e[0m&rdquo; sequence removes all attributes (formatting and colors). It can be a good idea to add it at the end of each colored text.
+Note 2: Foreground and background colours may vary, depending on the terminal&rsquo;s configuration and not all colours are supported.</li>
+</ol>
+<h5 id="setreset">
+  Set/Reset
+  <a class="anchor" href="#setreset">#</a>
+</h5>
+<ul>
+<li>0: Reset/remove all modifier, foreground and background attributes: echo -e &ldquo;\e[0mNormal Text&rdquo;</li>
+<li>1: Bold/Bright: echo -e &ldquo;Normal \e[1mBold&rdquo;</li>
+<li>2: Dim: echo -e &ldquo;Normal \e[2mDim&rdquo;</li>
+<li>4: Underlined: echo -e &ldquo;Normal \e[4mUnderlined&rdquo;</li>
+<li>5: Blink (doesn&rsquo;t work in most terminals except XTerm): echo -e &ldquo;Normal \e[5mBlink&rdquo;</li>
+<li>7: Reverse/Invert: echo -e &ldquo;Normal \e[7minverted&rdquo;</li>
+<li>8: Hidden (useful for sensitive info): echo -e &ldquo;Normal \e[8mHidden Input&rdquo;</li>
+<li>21: Reset/Remove bold/bright: echo -e &ldquo;Normal \e[1mBold \e[21mNormal&rdquo;</li>
+<li>22: Reset/Remove dim: echo -e &ldquo;Normal \e[2mDim \e[22mNormal&rdquo;</li>
+<li>24: Reset/Remove underline: echo -e &ldquo;Normal \e[4mUnderlined \e[24mNormal&rdquo;</li>
+<li>25: Reset/Remove blink: echo -e &ldquo;Normal \e[5mBlink \e[25mNormal&rdquo;</li>
+<li>27: Reset/Remove reverse/invert: echo -e &ldquo;Normal \e[7minverted \e[27mNormal&rdquo;</li>
+<li>28: Reset/Remove hidden: echo -e &ldquo;Normal \e[8mHidden \e[28mNormal&rdquo;</li>
+</ul>
+<h5 id="foreground">
+  Foreground
+  <a class="anchor" href="#foreground">#</a>
+</h5>
+<ul>
+<li>39: Default (usually green, white or light gray): echo -e &ldquo;Default \e[39mDefault&rdquo;</li>
+<li>30: Black: echo -e &ldquo;Default \e[30mBlack&rdquo; (best combined with a background colour: echo -e &ldquo;Default \e[30;107mBlack on white&rdquo;)</li>
+<li>31: Red (don&rsquo;t use with green background)</li>
+<li>32: Green</li>
+<li>33: Yellow</li>
+<li>34: Blue</li>
+<li>35: Magenta/Purple</li>
+<li>36: Cyan</li>
+<li>37: Light Gray</li>
+<li>90: Dark Gray</li>
+<li>91: Light Red</li>
+<li>92: Light Green</li>
+<li>93: Light Yellow</li>
+<li>94: Light Blue</li>
+<li>95: Light Magenta/Pink</li>
+<li>96: Light Cyan</li>
+<li>97: White</li>
+</ul>
+<h5 id="background">
+  Background
+  <a class="anchor" href="#background">#</a>
+</h5>
+<ul>
+<li>49: Default background color (usually black or blue)</li>
+<li>40: Black</li>
+<li>41: Red</li>
+<li>42: Green</li>
+<li>43: Yellow</li>
+<li>44: Blue</li>
+<li>45: Magenta/Purple</li>
+<li>46: Cyan</li>
+<li>47: Light Gray (don&rsquo;t use with white foreground)</li>
+<li>100: Dark Gray (don&rsquo;t use with black foreground)</li>
+<li>101: Light Red</li>
+<li>102: Light Green (don&rsquo;t use with white foreground)</li>
+<li>103: Light Yellow (don&rsquo;t use with white foreground)</li>
+<li>104: Light Blue (don&rsquo;t use with light yellow foreground)</li>
+<li>105: Light Magenta/Pink (don&rsquo;t use with light foreground)</li>
+<li>106: Light Cyan (don&rsquo;t use with white foreground)</li>
+<li>107: White (don&rsquo;t use with light foreground)</li>
+</ul>
+<p>To set both the foreground and background colours at once, use ther form echo -e &ldquo;\e[S;FG;BGm&rdquo;. For example: echo -e &ldquo;\e[1;97;41m&rdquo; (bold white foreground on red background)
+For 256 colour options, see the source page.</p>
+<p>这篇文章也不错：<a href="https://www.baeldung.com/linux/customize-bash-prompt">https://www.baeldung.com/linux/customize-bash-prompt</a></p>
+<h4 id="escape-characters">
+  Escape Characters
+  <a class="anchor" href="#escape-characters">#</a>
+</h4>
+<p>There’s a list of predefined <a href="https://tldp.org/HOWTO/Bash-Prompt-HOWTO/bash-prompt-escape-sequences.html">escape characters</a> with special decoding. These characters are preceded by the backslash character. Some examples are:</p>
+<ul>
+<li>\d: The current date</li>
+<li>\t: The current time</li>
+<li>\h: The hostname of our Linux machine</li>
+<li>\u: The username of the logged-in user</li>
+<li>\w: The user’s working directory</li>
+<li>[: Beginning of a sequence of non-printable characters that somehow control the behavior of the terminal</li>
+<li>]: End of non-printable control characters sequence</li>
+</ul>
+<h4 id="colors">
+  Colors
+  <a class="anchor" href="#colors">#</a>
+</h4>
+<p>A color character sequence</p>
+<p>starts with：</p>
+<ul>
+<li>[\033[</li>
+<li>[e[</li>
+</ul>
+<p>and ends with：</p>
+<ul>
+<li>]</li>
+</ul>
+<p>In addition, it should contain a code to a corresponding color.</p>
+<p>Color codes comprise two parts, separated by a semicolon, and are followed by the letter m.</p>
+<p>The first part：</p>
+<ul>
+<li>0 for the dark version</li>
+<li>1 for the light version</li>
+</ul>
+<p>The second part defines the color.</p>
+<ul>
+<li>Moreover, all codes that set the font color start with digit 3.</li>
+<li>Color codes that start with digit 4 define the background color.</li>
+<li>add the 4m code to underline the promp</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-plain" data-lang="plain"><span style="display:flex;"><span>$ PS1=&#34;\[\033[1;33;42;4m\]\d:\t$ \[\033[0m\]&#34;
+</span></span></code></pre></div><h4 id="ps1-1">
+  PS1
+  <a class="anchor" href="#ps1-1">#</a>
+</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>$ export PS1<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;\e[1m\]\e[3;32m\]\u\e[0;34m\]@\e[1;32m\]\H \e[1;34m\]\t \e[1m\]\e[3;30m\]\w \e[0m\]\n\$ &#39;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">\e</span><span style="color:#f92672">[</span>1;32m<span style="color:#ae81ff">\]</span><span style="color:#f92672">[</span>             加粗绿色显示<span style="color:#f92672">[</span>
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">\e</span><span style="color:#f92672">[</span>1m<span style="color:#ae81ff">\]\e</span><span style="color:#f92672">[</span>3;35m<span style="color:#ae81ff">\]\u</span>     加粗斜体紫红色显示用户名
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">\e</span><span style="color:#f92672">[</span>0;34m<span style="color:#ae81ff">\]</span>@             默认样式蓝色显示@
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">\e</span><span style="color:#f92672">[</span>1;33m<span style="color:#ae81ff">\]\H</span>            加粗黄色显示主机名
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">\e</span><span style="color:#f92672">[</span>1;32m<span style="color:#ae81ff">\]</span><span style="color:#f92672">][</span>            加粗绿色显示<span style="color:#f92672">][</span>
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">\e</span><span style="color:#f92672">[</span>1;34m<span style="color:#ae81ff">\]\t</span>            加粗蓝色显示时间
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">\e</span><span style="color:#f92672">[</span>1;32m<span style="color:#ae81ff">\]</span><span style="color:#f92672">]</span>             加粗绿色显示<span style="color:#f92672">]</span>和空格
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">\e</span><span style="color:#f92672">[</span>1m<span style="color:#ae81ff">\]\e</span><span style="color:#f92672">[</span>3;30m<span style="color:#ae81ff">\]\w</span>     加粗斜体黑色显示工作路径
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">\e</span><span style="color:#f92672">[</span>0m<span style="color:#ae81ff">\]\n\$</span>             清除所有格式，换行显示提示符，注意提示符后有空格
+</span></span><span style="display:flex;"><span>————————————————  
+</span></span><span style="display:flex;"><span>原文链接：https://blog.csdn.net/u014001096/article/details/125689548
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">####################################################################</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>export PS1<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;\[\033[01;32m\]\u\[\033[00m\]\[\033[01;30m\]@\t\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ &#39;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">\[\0</span>33<span style="color:#f92672">[</span>01;32m<span style="color:#ae81ff">\]\u\[\0</span>33<span style="color:#f92672">[</span>00m<span style="color:#ae81ff">\]</span>
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">\[\0</span>33<span style="color:#f92672">[</span>01;30m<span style="color:#ae81ff">\]</span>@<span style="color:#ae81ff">\t\[\0</span>33<span style="color:#f92672">[</span>00m<span style="color:#ae81ff">\]</span>
+</span></span><span style="display:flex;"><span>:
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">\[\0</span>33<span style="color:#f92672">[</span>01;34m<span style="color:#ae81ff">\]\w\[\0</span>33<span style="color:#f92672">[</span>00m<span style="color:#ae81ff">\]</span>
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">\$</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">####################################################################</span>
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">\e</span><span style="color:#f92672">[</span>0;32m - sets colour <span style="color:#f92672">(</span>in this <span style="color:#66d9ef">case</span>, to green<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">\e</span><span style="color:#f92672">[</span>m - sets colour back to the default
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">####################################################################</span>
+</span></span><span style="display:flex;"><span>parse_git_bg<span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">if</span> <span style="color:#f92672">[[</span> <span style="color:#66d9ef">$(</span>git status -s 2&gt; /dev/null<span style="color:#66d9ef">)</span> <span style="color:#f92672">]]</span>; <span style="color:#66d9ef">then</span>
+</span></span><span style="display:flex;"><span>    echo -e <span style="color:#e6db74">&#34;\033[1;31m&#34;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">else</span>
+</span></span><span style="display:flex;"><span>    echo -e <span style="color:#e6db74">&#34;\033[1;32m&#34;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">fi</span>  
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>export GIT_PS1_SHOWDIRTYSTATE<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>export PS1<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;\[$(parse_git_bg)\]$(__git_ps1 &#34;(%s) &#34;)\[\e[1;32m\]\u\[\e[0;39m\]@\[\e[1;36m\]\D{%F %T}\[\e[0;39m\]:\[\e[1;33m\]\w\[\e[0;39m\]\[\033[0m\]\$ &#39;</span>
+</span></span><span style="display:flex;"><span>日期 时间：<span style="color:#ae81ff">\D</span><span style="color:#f92672">{</span>%F %T<span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">####################################################################</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># for PS1</span>
+</span></span><span style="display:flex;"><span>source ~/.git-completion.bash
+</span></span><span style="display:flex;"><span>source ~/.git-prompt.sh
+</span></span><span style="display:flex;"><span>export GIT_PS1_SHOWDIRTYSTATE<span style="color:#f92672">=</span>true      <span style="color:#75715e"># staged &#39;+&#39;, unstaged &#39;*&#39;</span>
+</span></span><span style="display:flex;"><span>export GIT_PS1_SHOWUNTRACKEDFILES<span style="color:#f92672">=</span>true  <span style="color:#75715e"># &#39;%&#39; untracked files</span>
+</span></span><span style="display:flex;"><span>export GIT_PS1_SHOWUPSTREAM<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;auto&#34;</span>      <span style="color:#75715e"># &#39;&lt;&#39; behind, &#39;&gt;&#39; ahead, &#39;&lt;&gt;&#39; diverged, &#39;=&#39; no difference</span>
+</span></span><span style="display:flex;"><span>export GIT_PS1_SHOWSTASHSTATE<span style="color:#f92672">=</span>true      <span style="color:#75715e"># &#39;$&#39; something is stashed</span>
+</span></span><span style="display:flex;"><span>export GIT_PS1_DESCRIBE_STYLE<span style="color:#f92672">=</span>branch
+</span></span><span style="display:flex;"><span>export GIT_PS1_SHOWCOLORHINTS<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>bldblk<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;\[\e[1;30m\]&#34;</span> <span style="color:#75715e"># Black - Bold</span>
+</span></span><span style="display:flex;"><span>bldred<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;\[\e[1;31m\]&#34;</span> <span style="color:#75715e"># Red</span>
+</span></span><span style="display:flex;"><span>bldgrn<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;\[\e[1;32m\]&#34;</span> <span style="color:#75715e"># Green</span>
+</span></span><span style="display:flex;"><span>bldylw<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;\[\e[1;33m\]&#34;</span> <span style="color:#75715e"># Yellow</span>
+</span></span><span style="display:flex;"><span>bldblu<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;\[\e[1;34m\]&#34;</span> <span style="color:#75715e"># Blue</span>
+</span></span><span style="display:flex;"><span>bldpur<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;\[\e[1;35m\]&#34;</span> <span style="color:#75715e"># Purple</span>
+</span></span><span style="display:flex;"><span>bldcyn<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;\[\e[1;36m\]&#34;</span> <span style="color:#75715e"># Cyan</span>
+</span></span><span style="display:flex;"><span>bldwht<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;\[\e[1;37m\]&#34;</span> <span style="color:#75715e"># White</span>
+</span></span><span style="display:flex;"><span>bakblk<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;\[\e[40m\]&#34;</span>   <span style="color:#75715e"># Black - Background</span>
+</span></span><span style="display:flex;"><span>bakred<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;\[\e[41m\]&#34;</span>   <span style="color:#75715e"># Red</span>
+</span></span><span style="display:flex;"><span>bakgrn<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;\[\e[42m\]&#34;</span>   <span style="color:#75715e"># Green</span>
+</span></span><span style="display:flex;"><span>bakylw<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;\[\e[43m\]&#34;</span>   <span style="color:#75715e"># Yellow</span>
+</span></span><span style="display:flex;"><span>bakblu<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;\[\e[44m\]&#34;</span>   <span style="color:#75715e"># Blue</span>
+</span></span><span style="display:flex;"><span>bakpur<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;\[\e[45m\]&#34;</span>   <span style="color:#75715e"># Purple</span>
+</span></span><span style="display:flex;"><span>bakcyn<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;\[\e[46m\]&#34;</span>   <span style="color:#75715e"># Cyan</span>
+</span></span><span style="display:flex;"><span>bakwht<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;\[\e[47m\]&#34;</span>   <span style="color:#75715e"># White</span>
+</span></span><span style="display:flex;"><span>txtrst<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;\[\e[0m\]&#34;</span>    <span style="color:#75715e"># Text Reset</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>PS1<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">${</span>bakcyn<span style="color:#e6db74">}</span><span style="color:#e6db74">DOCKER</span><span style="color:#e6db74">${</span>txtrst<span style="color:#e6db74">}</span><span style="color:#e6db74"> &#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># PS1+=&#34;\$(__git_ps1&#34;(%s) &#34;)${COLOR_RESET}&#34;</span>
+</span></span><span style="display:flex;"><span>PS1<span style="color:#f92672">+=</span><span style="color:#e6db74">&#39;$(__git_ps1 &#34;(%s) &#34;)${COLOR_RESET}&#39;</span>
+</span></span><span style="display:flex;"><span>PS1<span style="color:#f92672">+=</span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">${</span>bakwht<span style="color:#e6db74">}${</span>bldwht<span style="color:#e6db74">}</span><span style="color:#e6db74">\u</span><span style="color:#e6db74">${</span>txtrst<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span>PS1<span style="color:#f92672">+=</span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">${</span>bldblu<span style="color:#e6db74">}</span><span style="color:#e6db74">@&#34;</span>
+</span></span><span style="display:flex;"><span>PS1<span style="color:#f92672">+=</span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">${</span>bldpur<span style="color:#e6db74">}</span><span style="color:#e6db74">\D{%F %T}&#34;</span>
+</span></span><span style="display:flex;"><span>PS1<span style="color:#f92672">+=</span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">${</span>bldwht<span style="color:#e6db74">}</span><span style="color:#e6db74">:</span><span style="color:#e6db74">${</span>bldcyn<span style="color:#e6db74">}</span><span style="color:#e6db74">\w</span><span style="color:#e6db74">${</span>txtrst<span style="color:#e6db74">}</span><span style="color:#e6db74">\$ &#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#### FINAL</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>PS1<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;</span><span style="color:#66d9ef">$(</span>tput bold<span style="color:#66d9ef">)$(</span>tput rev<span style="color:#66d9ef">)$(</span>tput setaf 4<span style="color:#66d9ef">)</span><span style="color:#e6db74">\u</span><span style="color:#66d9ef">$(</span>tput setaf 9<span style="color:#66d9ef">)</span><span style="color:#e6db74">@</span><span style="color:#66d9ef">$(</span>tput setaf 5<span style="color:#66d9ef">)</span><span style="color:#e6db74">\D{%F %T}</span><span style="color:#66d9ef">$(</span>tput setaf 9<span style="color:#66d9ef">)</span><span style="color:#e6db74">:</span><span style="color:#66d9ef">$(</span>tput setaf 6<span style="color:#66d9ef">)</span><span style="color:#e6db74">\w</span><span style="color:#66d9ef">$(</span>tput sgr0<span style="color:#66d9ef">)</span><span style="color:#e6db74">\n\$ &#34;</span>
+</span></span></code></pre></div><h4 id="__git_ps1">
+  __git_ps1
+  <a class="anchor" href="#__git_ps1">#</a>
+</h4>
+<p><a href="https://anotheruiguy.gitbooks.io/gitforeveryone/content/auto/README.html">https://anotheruiguy.gitbooks.io/gitforeveryone/content/auto/README.html</a></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>curl https://raw.githubusercontent.com/git/git/master/contrib/completion/git-completion.bash &gt; ~/.git-completion.bash
+</span></span><span style="display:flex;"><span>curl -o ~/.git-prompt.sh https://raw.githubusercontent.com/git/git/master/contrib/completion/git-prompt.sh
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>source ~/.git-completion.bash
+</span></span><span style="display:flex;"><span>    GIT_PS1_SHOWDIRTYSTATE<span style="color:#f92672">=</span>true
+</span></span><span style="display:flex;"><span>    GIT_PS1_SHOWSTASHSTATE<span style="color:#f92672">=</span>true
+</span></span><span style="display:flex;"><span>    GIT_PS1_SHOWUPSTREAM<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;auto&#34;</span>
+</span></span><span style="display:flex;"><span>source ~/.git-prompt.sh
+</span></span></code></pre></div><h3 id="时区">
+  时区
+  <a class="anchor" href="#%e6%97%b6%e5%8c%ba">#</a>
+</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>export TZ<span style="color:#f92672">=</span>Asia/Shanghai
+</span></span></code></pre></div><h2 id="gitconfig">
+  gitconfig
+  <a class="anchor" href="#gitconfig">#</a>
+</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>git config --global core.editor vim
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#f92672">[</span>user<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>	email <span style="color:#f92672">=</span> ljq0831@qq.com
+</span></span><span style="display:flex;"><span>	name <span style="color:#f92672">=</span> Jiaqi Li
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>core<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>	editor <span style="color:#f92672">=</span> vim
+</span></span></code></pre></div><h2 id="vimrc">
+  vimrc
+  <a class="anchor" href="#vimrc">#</a>
+</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#e6db74">&#34; Highlight cursor line underneath the cursor horizontally.
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">set cursorline
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">&#34;</span> Set shift width to <span style="color:#ae81ff">4</span> spaces.
+</span></span><span style="display:flex;"><span>set shiftwidth<span style="color:#f92672">=</span><span style="color:#ae81ff">4</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#e6db74">&#34; Set tab width to 4 columns.
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">set tabstop=4
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">&#34;</span> Use space characters instead of tabs.
+</span></span><span style="display:flex;"><span>set expandtab
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#e6db74">&#34; Show partial command you type in the last line of the screen.
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">set showcmd
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">&#34;</span> Show the mode you are on the last line.
+</span></span><span style="display:flex;"><span>set showmode
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#e6db74">&#34; Show matching words during a search.
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">set showmatch
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">&#34;</span> Use highlighting when doing a search.
+</span></span><span style="display:flex;"><span>set hlsearch
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>set nu
+</span></span></code></pre></div><h2 id="terminator">
+  Terminator
+  <a class="anchor" href="#terminator">#</a>
+</h2>
+<p><a href="https://github.com/gnome-terminator/terminator/blob/master/INSTALL.md">https://github.com/gnome-terminator/terminator/blob/master/INSTALL.md</a></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>sudo add-apt-repository ppa:mattrose/terminator
+</span></span><span style="display:flex;"><span>sudo apt-get update
+</span></span><span style="display:flex;"><span>sudo apt install terminator
+</span></span></code></pre></div><h1 id="docker">
+  docker
+  <a class="anchor" href="#docker">#</a>
+</h1>
+<p>参考：</p>
+<p><a href="https://solider245.github.io/VuePress-blog/%E6%96%87%E7%AB%A0%E8%BD%AC%E8%BD%BD/docker/mac%20%E4%B8%8B%E4%BD%BF%E7%94%A8%20Docker%20%E6%90%AD%E5%BB%BA%20ubuntu%20%E7%8E%AF%E5%A2%83.html">https://solider245.github.io/VuePress-blog/%E6%96%87%E7%AB%A0%E8%BD%AC%E8%BD%BD/docker/mac%20%E4%B8%8B%E4%BD%BF%E7%94%A8%20Docker%20%E6%90%AD%E5%BB%BA%20ubuntu%20%E7%8E%AF%E5%A2%83.html</a></p>
+<h2 id="拉取基本镜像">
+  拉取基本镜像
+  <a class="anchor" href="#%e6%8b%89%e5%8f%96%e5%9f%ba%e6%9c%ac%e9%95%9c%e5%83%8f">#</a>
+</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>docker pull ubuntu
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>docker run -i -t --name mineos ubuntu bash
+</span></span></code></pre></div><h2 id="安装vim">
+  安装vim
+  <a class="anchor" href="#%e5%ae%89%e8%a3%85vim">#</a>
+</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>apt update
+</span></span><span style="display:flex;"><span>apt install vim
+</span></span></code></pre></div><h2 id="切换用户">
+  切换用户
+  <a class="anchor" href="#%e5%88%87%e6%8d%a2%e7%94%a8%e6%88%b7">#</a>
+</h2>
+<p>添加用户</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>adduser jiaqili
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>usermod -a -G sudo jiaqili
+</span></span></code></pre></div><p><a href="https://www.yuque.com/manchey/boxvpq/kzi8n2g0n6tdbpa5">Ubuntu环境配置</a></p>
+<h3 id="安装bazel">
+  安装bazel
+  <a class="anchor" href="#%e5%ae%89%e8%a3%85bazel">#</a>
+</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>sudo apt install -y apt-transport-https curl gnupg
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>BAZEL_VERSION<span style="color:#f92672">=</span>4.1.0 <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  <span style="color:#f92672">&amp;&amp;</span> curl https://storage.googleapis.com/bazel-apt/doc/apt-key.pub.gpg | sudo apt-key add - <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  <span style="color:#f92672">&amp;&amp;</span> echo <span style="color:#e6db74">&#34;deb [arch=amd64] https://storage.googleapis.com/bazel-apt stable jdk1.8&#34;</span> | sudo tee /etc/apt/sources.list.d/bazel.list <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  <span style="color:#f92672">&amp;&amp;</span> sudo apt-get update <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  <span style="color:#f92672">&amp;&amp;</span> sudo apt-get install -y bazel-<span style="color:#e6db74">${</span>BAZEL_VERSION<span style="color:#e6db74">}</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  <span style="color:#f92672">&amp;&amp;</span> sudo ln -s /usr/bin/bazel-<span style="color:#e6db74">${</span>BAZEL_VERSION<span style="color:#e6db74">}</span> /usr/bin/bazel
+</span></span></code></pre></div><h3 id="配置ssh">
+  配置ssh
+  <a class="anchor" href="#%e9%85%8d%e7%bd%aessh">#</a>
+</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>Host code.deeproute.ai
+</span></span><span style="display:flex;"><span>  User git
+</span></span><span style="display:flex;"><span>  Port <span style="color:#ae81ff">2222</span>
+</span></span><span style="display:flex;"><span>  StrictHostKeyChecking no
+</span></span><span style="display:flex;"><span>  PreferredAuthentications publickey
+</span></span><span style="display:flex;"><span>  IdentityFile ~/.ssh/id_rsa
+</span></span></code></pre></div><h3 id="安装python">
+  安装python
+  <a class="anchor" href="#%e5%ae%89%e8%a3%85python">#</a>
+</h3>
+<p>组里环境用的是3.8版本</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>sudo apt install python3.8
+</span></span><span style="display:flex;"><span>sudo apt install python3-pip
+</span></span><span style="display:flex;"><span>sudo apt install python
+</span></span></code></pre></div><h3 id="安装各种工具">
+  安装各种工具
+  <a class="anchor" href="#%e5%ae%89%e8%a3%85%e5%90%84%e7%a7%8d%e5%b7%a5%e5%85%b7">#</a>
+</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>sudo apt install iputils-ping net-tools
+</span></span></code></pre></div><h3 id="中文支持ubuntu镜像不带中文ros镜像可以">
+  中文支持，ubuntu镜像不带中文，ros镜像可以
+  <a class="anchor" href="#%e4%b8%ad%e6%96%87%e6%94%af%e6%8c%81ubuntu%e9%95%9c%e5%83%8f%e4%b8%8d%e5%b8%a6%e4%b8%ad%e6%96%87ros%e9%95%9c%e5%83%8f%e5%8f%af%e4%bb%a5">#</a>
+</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-dockerfile" data-lang="dockerfile"><span style="display:flex;"><span>sudo apt install locales -y<span style="color:#960050;background-color:#1e0010">
+</span></span></span></code></pre></div><p>跟着这个帖子操作解决了：</p>
+<p><a href="https://zhuanlan.zhihu.com/p/76608268">https://zhuanlan.zhihu.com/p/76608268</a></p>
+<p>参考：</p>
+<p><a href="https://cloud.tencent.com/developer/article/1920078">https://cloud.tencent.com/developer/article/1920078</a></p>
+<h2 id="配置-ssh">
+  配置 SSH
+  <a class="anchor" href="#%e9%85%8d%e7%bd%ae-ssh">#</a>
+</h2>
+<p>这一步主要是为了mac 可以 ssh 连接 ubuntu 容器^[<a href="https://www.jianshu.com/p/426f0d8e6cbf">Docker-SSH连接docker容器</a>]。</p>
+<h3 id="安装-openssh-server">
+  安装 openssh-server
+  <a class="anchor" href="#%e5%ae%89%e8%a3%85-openssh-server">#</a>
+</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>apt-get install openssh-server
+</span></span></code></pre></div><p>用于开启 ssh 服务供外部连接。</p>
+<h3 id="配置-sshd">
+  配置 sshd
+  <a class="anchor" href="#%e9%85%8d%e7%bd%ae-sshd">#</a>
+</h3>
+<p>需要更改一下 sshd 的默认配置，编辑文件 /etc/ssh/sshd_config ，大概从 29 行开始主要更改三处，更改后内容如下：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-plain" data-lang="plain"><span style="display:flex;"><span>PermitRootLogin yes # 可以登录 root 用户
+</span></span><span style="display:flex;"><span>PubkeyAuthentication yes # 可以使用 ssh 公钥许可
+</span></span><span style="display:flex;"><span>AuthorizedKeysFile	.ssh/authorized_keys # 公钥信息保存到文件 .ssh/authorized_keys 中
+</span></span></code></pre></div><h3 id="重启-sshd">
+  重启 sshd
+  <a class="anchor" href="#%e9%87%8d%e5%90%af-sshd">#</a>
+</h3>
+<p>因为 ubuntu 过于精简，不能使用 service 命令方便的重启 sshd，这里使用命令 /etc/init.d/ssh restart 进行重启^[<a href="https://blog.csdn.net/u013015629/article/details/70045809">Ubuntu下&quot;sshd:unrecognized service”</a>]，重启是为了让上面的配置生效。</p>
+<h3 id="添加主机的-ssh-公钥">
+  添加主机的 ssh 公钥
+  <a class="anchor" href="#%e6%b7%bb%e5%8a%a0%e4%b8%bb%e6%9c%ba%e7%9a%84-ssh-%e5%85%ac%e9%92%a5">#</a>
+</h3>
+<p>这里的主机指的就是 macOS，保证此时还是在 ubuntu 容器中。</p>
+<ol>
+<li>在 HOME 目录下创建 .ssh 目录：mkdir ~/.ssh</li>
+<li>新建文件 ~/.ssh/authorized_keys ：touch ~/.ssh/authorized_keys</li>
+<li>新开一个 macOS 下的终端窗口，执行命令 cat ~/.ssh/id_rsa.pub，复制打印的一行公钥信息</li>
+<li>回到 ubuntu 容器中，将第 3 步复制的公钥粘贴到 ~/.ssh/authorized_keys 中保存。</li>
+</ol>
+<p>如果使用过ssh免密码的登陆操作的话，相信您知道ssh的密钥生成方法，如果没了解过，可以参考：<a href="https://smslit.coding.me/ownwiki/linux/kali/#ssh-keys">ssh-keys</a></p>
+<ol>
+<li>此时完成了 SSH 访问支持的添加，ctrl + d 退出容器。</li>
+</ol>
+<h4 id="免密不成功可能是文件权限问题">
+  免密不成功，可能是文件权限问题
+  <a class="anchor" href="#%e5%85%8d%e5%af%86%e4%b8%8d%e6%88%90%e5%8a%9f%e5%8f%af%e8%83%bd%e6%98%af%e6%96%87%e4%bb%b6%e6%9d%83%e9%99%90%e9%97%ae%e9%a2%98">#</a>
+</h4>
+<p>:::color4
+Dec 26 12:30:38 server sshd[3503454]: Authentication refused: bad ownership or modes for directory /home/user/.ssh</p>
+<p>:::</p>
+<p>As you can see – <em>bad ownership or modes for directory /home/user/.ssh</em>.</p>
+<p>SSH doesn’t like it if your home or <em>~/.ssh</em> directories have group write permissions. Your home directory should be writable only by you, ~/.ssh should be 700, and authorized_keys should be 600 :</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-plain" data-lang="plain"><span style="display:flex;"><span>chmod go-w /home/user
+</span></span><span style="display:flex;"><span>chmod 700 /home/user/.ssh
+</span></span><span style="display:flex;"><span>chmod 600 /home/user/.ssh/authorized_keys
+</span></span></code></pre></div><h3 id="跳板机配置">
+  跳板机配置
+  <a class="anchor" href="#%e8%b7%b3%e6%9d%bf%e6%9c%ba%e9%85%8d%e7%bd%ae">#</a>
+</h3>
+<p><a href="https://zhuanlan.zhihu.com/p/74193910">https://zhuanlan.zhihu.com/p/74193910</a></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-plain" data-lang="plain"><span style="display:flex;"><span>Host onboard
+</span></span><span style="display:flex;"><span>    HostName 10.96.96.130
+</span></span><span style="display:flex;"><span>    User     onboard
+</span></span><span style="display:flex;"><span>    Port     2222
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Host nvidia
+</span></span><span style="display:flex;"><span>    HostName 192.168.8.107
+</span></span><span style="display:flex;"><span>    Port 22
+</span></span><span style="display:flex;"><span>    User nvidia
+</span></span><span style="display:flex;"><span>    ProxyJump onboard
+</span></span></code></pre></div><h2 id="提交修改到镜像">
+  提交修改到镜像
+  <a class="anchor" href="#%e6%8f%90%e4%ba%a4%e4%bf%ae%e6%94%b9%e5%88%b0%e9%95%9c%e5%83%8f">#</a>
+</h2>
+<p>现在已经推出到正常的 mac 终端窗口中了，容器的修改不会影响到源镜像，上面的操作我们已经完成了 Ubuntu 的基本配置，并且添加了 SSH 支持，这一步是产生新的镜像版本。</p>
+<ol>
+<li>查看刚刚操作的容器信息，执行命令 docker ps -a ，可以看到 mineos 的状态已经是退出了，主要关注 mineos 的 CONTAINER ID ，复制这个 ID 号，比如为 e5d8c1030724</li>
+<li>执行下面的命令提交产生 ubuntu 新版本的镜像：</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>docker commit -m <span style="color:#e6db74">&#39;add ssh&#39;</span> -a <span style="color:#e6db74">&#39;5km&#39;</span> e5d8c1030724 ubuntu-ssh
+</span></span></code></pre></div><pre><code>- -m，指定提交信息
+- -a，指定提交者
+- 你需要把 e5d8c1030724 替换为您的容器的 CONTAINER ID
+- ubuntu-ssh 是新镜像的名称，可以随意指定
+</code></pre>
+<ol start="3">
+<li>使用命令 docker image ls 可以查看当前安装的镜像，上述操作正常的话就会看到 ubuntu-ssh 的镜像信息</li>
+<li>此时之前创建的容器就没用了，可以通过命令 docker rm mineos 进行删除</li>
+</ol>
+<h3 id="最终的-ubuntu-容器">
+  最终的 ubuntu 容器
+  <a class="anchor" href="#%e6%9c%80%e7%bb%88%e7%9a%84-ubuntu-%e5%ae%b9%e5%99%a8">#</a>
+</h3>
+<p>有了具有 SSH 支持的 ubuntu 镜像，我们就可以创建新的 ubuntu 容器，通过以下命令进行创建：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>docker run -d -p 26122:22 --name learn ubuntu-ssh /usr/sbin/sshd -D
+</span></span></code></pre></div><table>
+  <thead>
+      <tr>
+          <th>参数</th>
+          <th>值</th>
+          <th>含义</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>-d</td>
+          <td>无</td>
+          <td>后台运行</td>
+      </tr>
+      <tr>
+          <td>-p</td>
+          <td>26122:22</td>
+          <td>绑定主机的 26122 端口到ubuntu容器的 22 端口(ssh服务的默认端口为 22)</td>
+      </tr>
+      <tr>
+          <td>–name</td>
+          <td>learn</td>
+          <td>指定容器名称为 learn</td>
+      </tr>
+      <tr>
+          <td>ubuntu-ssh</td>
+          <td>无</td>
+          <td>使用镜像 ubuntu-ssh 创建容器</td>
+      </tr>
+      <tr>
+          <td>/usr/sbin/sshd -D</td>
+          <td>无</td>
+          <td>指定容器启动使用的应用及参数</td>
+      </tr>
+  </tbody>
+</table>
+<p>在 macOS 的终端中执行命令 ssh -p 26122 root@localhost 即可连接已经启动的 ubuntu 容器 learn</p>
+<p>为了更方便的连接，可以为容器创建 ssh 连接的主机短名，往 macOS 的 ~/.ssh/config 中添加以下内容：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-plain" data-lang="plain"><span style="display:flex;"><span>Host learn
+</span></span><span style="display:flex;"><span>    HostName localhost
+</span></span><span style="display:flex;"><span>    User     root
+</span></span><span style="display:flex;"><span>    Port     26122
+</span></span></code></pre></div><p>此时就可以通过命令 ssh learn 连接 ubuntu 容器 learn 了。</p>
+<h2 id="开发环境">
+  开发环境
+  <a class="anchor" href="#%e5%bc%80%e5%8f%91%e7%8e%af%e5%a2%83">#</a>
+</h2>
+<p>安装各种缺失的库和工具</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-dockerfile" data-lang="dockerfile"><span style="display:flex;"><span>sudo apt install libacl1-dev libgoogle-glog-dev libgtest-dev -y<span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span>sudo apt install libncurses-dev<span style="color:#960050;background-color:#1e0010">
+</span></span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-dockerfile" data-lang="dockerfile"><span style="display:flex;"><span>sudo apt update <span style="color:#f92672">&amp;&amp;</span> sudo apt install deeproute-cmake-dev<span style="color:#f92672">=</span>3.17.0 <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  deeproute-protobuf-dev<span style="color:#f92672">=</span>3.13.0 <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  deeproute-os-interface-dev <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  deeproute-absl-dev<span style="color:#f92672">=</span>1.3.1 <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  deeproute-s2geometry-dev <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  deeproute-grpc-dev<span style="color:#f92672">=</span>1.37.2<span style="color:#960050;background-color:#1e0010">
+</span></span></span></code></pre></div><h3 id="安装ros">
+  安装ros
+  <a class="anchor" href="#%e5%ae%89%e8%a3%85ros">#</a>
+</h3>
+<p><a href="https://wiki.ros.org/melodic/Installation/Ubuntu">https://wiki.ros.org/melodic/Installation/Ubuntu</a></p>
+<p>遇到冲突，先装一下aptitude</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-dockerfile" data-lang="dockerfile"><span style="display:flex;"><span>sudo apt install aptitude<span style="color:#960050;background-color:#1e0010">
+</span></span></span></code></pre></div><p>{% endraw %}</p>
+</article>
+ 
+      
+
+      <footer class="book-footer">
+        
+  <div class="flex flex-wrap justify-between">
+
+
+
+
+
+</div>
+
+
+
+  <script>(function(){function e(e){const t=window.getSelection(),n=document.createRange();n.selectNodeContents(e),t.removeAllRanges(),t.addRange(n)}document.querySelectorAll("pre code").forEach(t=>{t.addEventListener("click",function(){if(window.getSelection().toString())return;e(t.parentElement),navigator.clipboard&&navigator.clipboard.writeText(t.parentElement.textContent)})})})()</script>
+
+
+ 
+        
+      </footer>
+
+      
+  
+  <div class="book-comments">
+
+</div>
+  
+ 
+
+      <label for="menu-control" class="hidden book-menu-overlay"></label>
+    </div>
+
+    
+    <aside class="book-toc">
+      <div class="book-toc-content">
+        
+  
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#整理launcher">整理launcher</a></li>
+    <li><a href="#iterm2快捷键">iterm2快捷键</a></li>
+    <li><a href="#python">python</a>
+      <ul>
+        <li><a href="#pyenv">pyenv</a></li>
+      </ul>
+    </li>
+  </ul>
+
+  <ul>
+    <li><a href="#settingsjson">settings.json</a>
+      <ul>
+        <li><a href="#vim">vim</a></li>
+        <li><a href="#scrollbeyondlastline">scrollBeyondLastLine</a></li>
+        <li><a href="#go-forward--go-back">go forward / go back</a></li>
+      </ul>
+    </li>
+    <li><a href="#插件">插件</a></li>
+    <li><a href="#通过vscode使用docker">通过vscode使用docker</a></li>
+  </ul>
+
+  <ul>
+    <li><a href="#bashrc">bashrc</a>
+      <ul>
+        <li><a href="#ps1">PS1</a></li>
+        <li><a href="#时区">时区</a></li>
+      </ul>
+    </li>
+    <li><a href="#gitconfig">gitconfig</a></li>
+    <li><a href="#vimrc">vimrc</a></li>
+    <li><a href="#terminator">Terminator</a></li>
+  </ul>
+
+  <ul>
+    <li><a href="#拉取基本镜像">拉取基本镜像</a></li>
+    <li><a href="#安装vim">安装vim</a></li>
+    <li><a href="#切换用户">切换用户</a>
+      <ul>
+        <li><a href="#安装bazel">安装bazel</a></li>
+        <li><a href="#配置ssh">配置ssh</a></li>
+        <li><a href="#安装python">安装python</a></li>
+        <li><a href="#安装各种工具">安装各种工具</a></li>
+        <li><a href="#中文支持ubuntu镜像不带中文ros镜像可以">中文支持，ubuntu镜像不带中文，ros镜像可以</a></li>
+      </ul>
+    </li>
+    <li><a href="#配置-ssh">配置 SSH</a>
+      <ul>
+        <li><a href="#安装-openssh-server">安装 openssh-server</a></li>
+        <li><a href="#配置-sshd">配置 sshd</a></li>
+        <li><a href="#重启-sshd">重启 sshd</a></li>
+        <li><a href="#添加主机的-ssh-公钥">添加主机的 ssh 公钥</a></li>
+        <li><a href="#跳板机配置">跳板机配置</a></li>
+      </ul>
+    </li>
+    <li><a href="#提交修改到镜像">提交修改到镜像</a>
+      <ul>
+        <li><a href="#最终的-ubuntu-容器">最终的 ubuntu 容器</a></li>
+      </ul>
+    </li>
+    <li><a href="#开发环境">开发环境</a>
+      <ul>
+        <li><a href="#安装ros">安装ros</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+
+
+ 
+      </div>
+    </aside>
+    
+  </main>
+
+  
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
