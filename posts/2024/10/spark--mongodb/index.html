@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="
+  spark
+  #
+
+https://spark.apache.org/docs/latest/api/python/index.html#index-page-spark-sql-and-dataframes
+
+Spark SQL &amp; DataFrames
+
+spark.createDataFrame
+
+df.show()
+df.columns
+df.printSchema()
+
+
+
+
+Pandas API on Spark
+Structured Streaming
+Machine Learning
+
+
+  mongodb
+  #
+
+
+  安装
+  #
+
+https://www.mongodb.com/zh-cn/docs/v6.0/tutorial/install-mongodb-on-os-x/
+
+  启停服务
+  #
+
+brew services stop mongodb-community@7.0
+
+  配置文件
+  #
+
+https://www.mongodb.com/zh-cn/docs/v6.0/reference/configuration-options/
+
+  debug
+  #
+
+要验证 MongoDB 是否正在运行，请执行以下操作之一：
+
+如果将 MongoDB 作为 macOS 服务启动：
+
+brew services list
+应该会看到服务 mongodb-community 列为 started。
+
+如果将 MongoDB 作为后台进程手动启动：
+
+ps aux | grep -v grep | grep mongod
+应该在输出中看到 mongod 进程。">
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#343a40">
+<meta name="color-scheme" content="light dark"><meta property="og:url" content="http://localhost:1313/posts/2024/10/spark--mongodb/">
+  <meta property="og:site_name" content="Manchey Blog">
+  <meta property="og:title" content="spark-&-mongodb">
+  <meta property="og:description" content="spark # https://spark.apache.org/docs/latest/api/python/index.html#index-page-spark-sql-and-dataframes
+Spark SQL &amp; DataFrames spark.createDataFrame df.show() df.columns df.printSchema() Pandas API on Spark Structured Streaming Machine Learning mongodb # 安装 # https://www.mongodb.com/zh-cn/docs/v6.0/tutorial/install-mongodb-on-os-x/
+启停服务 # brew services stop mongodb-community@7.0 配置文件 # https://www.mongodb.com/zh-cn/docs/v6.0/reference/configuration-options/
+debug # 要验证 MongoDB 是否正在运行，请执行以下操作之一：
+如果将 MongoDB 作为 macOS 服务启动： brew services list 应该会看到服务 mongodb-community 列为 started。
+如果将 MongoDB 作为后台进程手动启动： ps aux | grep -v grep | grep mongod 应该在输出中看到 mongod 进程。">
+  <meta property="og:locale" content="en_us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="post">
+    <meta property="article:published_time" content="2024-10-23T00:00:00+00:00">
+    <meta property="article:modified_time" content="2025-01-30T21:33:55+08:00">
+    <meta property="article:tag" content="Tech/Spark">
+    <meta property="article:tag" content="Tech/Mongodb">
+    <meta property="article:tag" content="Blog">
+<title>spark-&amp;-mongodb | Manchey Blog</title>
+<link rel="icon" href="http://localhost:1313/logo.png" >
+<link rel="manifest" href="http://localhost:1313/manifest.json">
+<link rel="canonical" href="http://localhost:1313/posts/2024/10/spark--mongodb/">
+<link rel="stylesheet" href="http://localhost:1313/book.min.2d11051f9bbf9eb3c1e80b2b7a60b21379d1b88bdcc5a0c2b268ec9357d72f50.css" integrity="sha256-LREFH5u/nrPB6AsremCyE3nRuIvcxaDCsmjsk1fXL1A=" crossorigin="anonymous">
+  <script defer src="http://localhost:1313/fuse.min.js"></script>
+  <script defer src="http://localhost:1313/en.search.min.41873f4a8e861b1c2598929dd6c471abbce53c920d7f4046a555c40b88d9374c.js" integrity="sha256-QYc/So6GGxwlmJKd1sRxq7zlPJINf0BGpVXEC4jZN0w=" crossorigin="anonymous"></script>
+<!--
+Made with Book Theme
+https://github.com/alex-shpak/hugo-book
+-->
+  
+</head>
+<body dir="ltr">
+  <input type="checkbox" class="hidden toggle" id="menu-control" />
+  <input type="checkbox" class="hidden toggle" id="toc-control" />
+  <main class="container flex">
+    <aside class="book-menu">
+      <div class="book-menu-content">
+        
+  <nav>
+<h2 class="book-brand">
+  <a class="flex align-center" href="http://localhost:1313/"><img src="http://localhost:1313/logo.png" alt="Logo" class="book-icon" /><span>Manchey Blog</span>
+  </a>
+</h2>
+
+
+<div class="book-search hidden">
+  <input type="text" id="book-search-input" placeholder="Search" aria-label="Search" maxlength="64" data-hotkeys="s/" />
+  <div class="book-search-spinner hidden"></div>
+  <ul id="book-search-results"></ul>
+</div>
+<script>document.querySelector(".book-search").classList.remove("hidden")</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+<ul>
+  
+  <li>
+    <a href="http://localhost:1313/"  >
+        Home
+      </a>
+  </li>
+  
+  <li>
+    <a href="http://localhost:1313/post/"  >
+        Blog
+      </a>
+  </li>
+  
+  <li>
+    <a href="http://localhost:1313/about/"  >
+        About
+      </a>
+  </li>
+  
+  <li>
+    <a href="https://github.com/Manchey/manchey.github.io"  target="_blank" rel="noopener">
+        Github
+      </a>
+  </li>
+  
+</ul>
+
+
+
+
+
+
+</nav>
+
+
+
+
+  <script>(function(){var e=document.querySelector("aside .book-menu-content");addEventListener("beforeunload",function(){localStorage.setItem("menu.scrollTop",e.scrollTop)}),e.scrollTop=localStorage.getItem("menu.scrollTop")})()</script>
+
+
+ 
+      </div>
+    </aside>
+
+    <div class="book-page">
+      <header class="book-header">
+        
+  <div class="flex align-center justify-between">
+  <label for="menu-control">
+    <img src="http://localhost:1313/svg/menu.svg" class="book-icon" alt="Menu" />
+  </label>
+
+  <h3>spark-&amp;-mongodb</h3>
+
+  <label for="toc-control">
+    
+    <img src="http://localhost:1313/svg/toc.svg" class="book-icon" alt="Table of Contents" />
+    
+  </label>
+</div>
+
+
+  
+  <aside class="hidden clearfix">
+    
+  
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#安装">安装</a>
+      <ul>
+        <li><a href="#启停服务">启停服务</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+
+
+
+  </aside>
+  
+ 
+      </header>
+
+      
+      
+  <article class="markdown book-article"><h1 id="spark">
+  spark
+  <a class="anchor" href="#spark">#</a>
+</h1>
+<p><a href="https://spark.apache.org/docs/latest/api/python/index.html#index-page-spark-sql-and-dataframes">https://spark.apache.org/docs/latest/api/python/index.html#index-page-spark-sql-and-dataframes</a></p>
+<ul>
+<li>Spark SQL &amp; DataFrames
+<ul>
+<li>spark.createDataFrame
+<ul>
+<li>df.show()</li>
+<li>df.columns</li>
+<li>df.printSchema()</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Pandas API on Spark</li>
+<li>Structured Streaming</li>
+<li>Machine Learning</li>
+</ul>
+<h1 id="mongodb">
+  mongodb
+  <a class="anchor" href="#mongodb">#</a>
+</h1>
+<h2 id="安装">
+  安装
+  <a class="anchor" href="#%e5%ae%89%e8%a3%85">#</a>
+</h2>
+<p><a href="https://www.mongodb.com/zh-cn/docs/v6.0/tutorial/install-mongodb-on-os-x/">https://www.mongodb.com/zh-cn/docs/v6.0/tutorial/install-mongodb-on-os-x/</a></p>
+<h3 id="启停服务">
+  启停服务
+  <a class="anchor" href="#%e5%90%af%e5%81%9c%e6%9c%8d%e5%8a%a1">#</a>
+</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-plain" data-lang="plain"><span style="display:flex;"><span>brew services stop mongodb-community@7.0
+</span></span></code></pre></div><h4 id="配置文件">
+  配置文件
+  <a class="anchor" href="#%e9%85%8d%e7%bd%ae%e6%96%87%e4%bb%b6">#</a>
+</h4>
+<p><a href="https://www.mongodb.com/zh-cn/docs/v6.0/reference/configuration-options/">https://www.mongodb.com/zh-cn/docs/v6.0/reference/configuration-options/</a></p>
+<h4 id="debug">
+  debug
+  <a class="anchor" href="#debug">#</a>
+</h4>
+<p>要验证 MongoDB 是否正在运行，请执行以下操作之一：</p>
+<ul>
+<li>如果将 MongoDB <strong>作为 macOS 服务</strong>启动：</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-plain" data-lang="plain"><span style="display:flex;"><span>brew services list
+</span></span></code></pre></div><p>应该会看到服务 <code>mongodb-community</code> 列为 <code>started</code>。</p>
+<ul>
+<li>如果将 <strong>MongoDB 作为后台进程手动</strong>启动：</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-plain" data-lang="plain"><span style="display:flex;"><span>ps aux | grep -v grep | grep mongod
+</span></span></code></pre></div><p>应该在输出中看到 <code>mongod</code> 进程。</p>
+<p>还可以查看日志文件，看到 <code>mongod</code> 进程的当前状态：<code>/usr/local/var/log/mongodb/mongo.log</code>。</p>
+</article>
+ 
+      
+
+      <footer class="book-footer">
+        
+  <div class="flex flex-wrap justify-between">
+
+
+  <div><a class="flex align-center" href="https://github.com/Manchey/manchey.github.io/commit/2903b8c4ee03ad8b282578fcbb245f5703915468" title='Last modified by 栗嘉琪 | January 30, 2025' target="_blank" rel="noopener">
+      <img src="http://localhost:1313/svg/calendar.svg" class="book-icon" alt="" />
+      <span>January 30, 2025</span>
+    </a>
+  </div>
+
+
+
+
+</div>
+
+
+
+  <script>(function(){function e(e){const t=window.getSelection(),n=document.createRange();n.selectNodeContents(e),t.removeAllRanges(),t.addRange(n)}document.querySelectorAll("pre code").forEach(t=>{t.addEventListener("click",function(){if(window.getSelection().toString())return;e(t.parentElement),navigator.clipboard&&navigator.clipboard.writeText(t.parentElement.textContent)})})})()</script>
+
+
+ 
+        
+      </footer>
+
+      
+  
+  <div class="book-comments">
+
+</div>
+  
+ 
+
+      <label for="menu-control" class="hidden book-menu-overlay"></label>
+    </div>
+
+    
+    <aside class="book-toc">
+      <div class="book-toc-content">
+        
+  
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#安装">安装</a>
+      <ul>
+        <li><a href="#启停服务">启停服务</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+
+
+ 
+      </div>
+    </aside>
+    
+  </main>
+
+  
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+

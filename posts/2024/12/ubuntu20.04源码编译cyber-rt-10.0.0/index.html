@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="
+  ubuntu20.04源码编译cyber rt 10.0.0
+  #
+
+
+  安装 fastdds
+  #
+
+apollo 给的环境是一个 docker。third_party 里 fastdds 的 bazel build 直接通过系统路径依赖的 fastdds。
+自己的环境中没有，手动安装一下，看文档是说 10.0.0 升级到了 2.x 版本。
+参考 fastdds 官网文档安装一下。
+https://fast-dds.docs.eprosima.com/en/latest/installation/binaries/binaries_linux.html
+二进制版本，下载解压，sudo install.sh
+
+装不上 python3-xmlschema
+
+换成 pip3 install xmlschema，然后注释掉脚本里的 python3-xmlschema
+
+
+clone foonathan_memory_vendor 报错；手动进入到该文件夹后 build 通过
+cmake 版本不匹配，要求最低 3.20，但是自带的是 3.16。升级麻烦，直接替换了。按照经验大部分人都是随便写个版本，实际根本没用到什么新功能。
+
+编译通过
+
+  cyber rt
+  #
+
+把 third_party 里的 fastdds/uuid 依赖加上。
+还缺 bvar。
+
+  安装 bvar
+  #
+
+install_pkg_repo.sh 脚本里安装的。
+
+
+1
+2
+3
+4
+5
+6
+7
+8
+
+
+# 添加 Apollo 的 GPG 密钥
+curl -fsSL https://apollo-pkg-beta.cdn.bcebos.com/neo/beta/key/deb.gpg.key | sudo gpg --dearmor -o /etc/apt/keyrings/apolloauto.gpg
+
+# 添加 Apollo 的软件源
+echo &#34;deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/apolloauto.gpg] https://apollo-pkg-beta.cdn.bcebos.com/apollo/core $(. /etc/os-release &amp;&amp; echo &#34;$VERSION_CODENAME&#34;) main&#34; | sudo tee /etc/apt/sources.list.d/apolloauto.list
+
+sudo apt update
+sudo apt-get install bvar
+
+
+装不上，有人提 issue：">
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#343a40">
+<meta name="color-scheme" content="light dark"><meta property="og:url" content="https://manchey.github.io/posts/2024/12/ubuntu20.04%E6%BA%90%E7%A0%81%E7%BC%96%E8%AF%91cyber-rt-10.0.0/">
+  <meta property="og:site_name" content="Manchey Blog">
+  <meta property="og:title" content="ubuntu20.04源码编译cyber rt 10.0.0">
+  <meta property="og:description" content="ubuntu20.04源码编译cyber rt 10.0.0 # 安装 fastdds # apollo 给的环境是一个 docker。third_party 里 fastdds 的 bazel build 直接通过系统路径依赖的 fastdds。
+自己的环境中没有，手动安装一下，看文档是说 10.0.0 升级到了 2.x 版本。
+参考 fastdds 官网文档安装一下。
+https://fast-dds.docs.eprosima.com/en/latest/installation/binaries/binaries_linux.html
+二进制版本，下载解压，sudo install.sh
+装不上 python3-xmlschema 换成 pip3 install xmlschema，然后注释掉脚本里的 python3-xmlschema clone foonathan_memory_vendor 报错；手动进入到该文件夹后 build 通过 cmake 版本不匹配，要求最低 3.20，但是自带的是 3.16。升级麻烦，直接替换了。按照经验大部分人都是随便写个版本，实际根本没用到什么新功能。 编译通过
+cyber rt # 把 third_party 里的 fastdds/uuid 依赖加上。
+还缺 bvar。
+安装 bvar # install_pkg_repo.sh 脚本里安装的。
+1 2 3 4 5 6 7 8 # 添加 Apollo 的 GPG 密钥 curl -fsSL https://apollo-pkg-beta.cdn.bcebos.com/neo/beta/key/deb.gpg.key | sudo gpg --dearmor -o /etc/apt/keyrings/apolloauto.gpg # 添加 Apollo 的软件源 echo &#34;deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/apolloauto.gpg] https://apollo-pkg-beta.cdn.bcebos.com/apollo/core $(. /etc/os-release &amp;&amp; echo &#34;$VERSION_CODENAME&#34;) main&#34; | sudo tee /etc/apt/sources.list.d/apolloauto.list sudo apt update sudo apt-get install bvar 装不上，有人提 issue：">
+  <meta property="og:locale" content="en_us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="post">
+    <meta property="article:published_time" content="2024-12-26T00:00:00+00:00">
+    <meta property="article:modified_time" content="2024-12-26T00:00:00+00:00">
+<title>ubuntu20.04源码编译cyber rt 10.0.0 | Manchey Blog</title>
+<link rel="icon" href="https://manchey.github.io/logo.png" >
+<link rel="manifest" href="https://manchey.github.io/manifest.json">
+<link rel="canonical" href="https://manchey.github.io/posts/2024/12/ubuntu20.04%E6%BA%90%E7%A0%81%E7%BC%96%E8%AF%91cyber-rt-10.0.0/">
+<link rel="stylesheet" href="https://manchey.github.io/book.min.2d11051f9bbf9eb3c1e80b2b7a60b21379d1b88bdcc5a0c2b268ec9357d72f50.css" integrity="sha256-LREFH5u/nrPB6AsremCyE3nRuIvcxaDCsmjsk1fXL1A=" crossorigin="anonymous">
+  <script defer src="https://manchey.github.io/fuse.min.js"></script>
+  <script defer src="https://manchey.github.io/en.search.min.f5eb7e06e94822c203a80b9054e9a528440f25b32e71d6d1955036cdde189092.js" integrity="sha256-9et&#43;BulIIsIDqAuQVOmlKEQPJbMucdbRlVA2zd4YkJI=" crossorigin="anonymous"></script>
+
+
+<!--
+Made with Book Theme
+https://github.com/alex-shpak/hugo-book
+-->
+  
+</head>
+<body dir="ltr">
+  <input type="checkbox" class="hidden toggle" id="menu-control" />
+  <input type="checkbox" class="hidden toggle" id="toc-control" />
+  <main class="container flex">
+    <aside class="book-menu">
+      <div class="book-menu-content">
+        
+  <nav>
+<h2 class="book-brand">
+  <a class="flex align-center" href="https://manchey.github.io/"><img src="https://manchey.github.io/logo.png" alt="Logo" class="book-icon" /><span>Manchey Blog</span>
+  </a>
+</h2>
+
+
+<div class="book-search hidden">
+  <input type="text" id="book-search-input" placeholder="Search" aria-label="Search" maxlength="64" data-hotkeys="s/" />
+  <div class="book-search-spinner hidden"></div>
+  <ul id="book-search-results"></ul>
+</div>
+<script>document.querySelector(".book-search").classList.remove("hidden")</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+<ul>
+  
+  <li>
+    <a href="https://manchey.github.io/"  >
+        Home
+      </a>
+  </li>
+  
+  <li>
+    <a href="https://manchey.github.io/post/"  >
+        Blog
+      </a>
+  </li>
+  
+  <li>
+    <a href="https://manchey.github.io/diary/"  >
+        Diary
+      </a>
+  </li>
+  
+  <li>
+    <a href="https://manchey.github.io/about/"  >
+        About
+      </a>
+  </li>
+  
+  <li>
+    <a href="https://github.com/Manchey/manchey.github.io"  target="_blank" rel="noopener">
+        Github
+      </a>
+  </li>
+  
+</ul>
+
+
+
+
+
+
+</nav>
+
+
+
+
+  <script>(function(){var e=document.querySelector("aside .book-menu-content");addEventListener("beforeunload",function(){localStorage.setItem("menu.scrollTop",e.scrollTop)}),e.scrollTop=localStorage.getItem("menu.scrollTop")})()</script>
+
+
+ 
+      </div>
+    </aside>
+
+    <div class="book-page">
+      <header class="book-header">
+        
+  <div class="flex align-center justify-between">
+  <label for="menu-control">
+    <img src="https://manchey.github.io/svg/menu.svg" class="book-icon" alt="Menu" />
+  </label>
+
+  <h3>ubuntu20.04源码编译cyber rt 10.0.0</h3>
+
+  <label for="toc-control">
+    
+    <img src="https://manchey.github.io/svg/toc.svg" class="book-icon" alt="Table of Contents" />
+    
+  </label>
+</div>
+
+
+  
+  <aside class="hidden clearfix">
+    
+  
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#安装-fastdds">安装 fastdds</a></li>
+    <li><a href="#cyber-rt">cyber rt</a>
+      <ul>
+        <li><a href="#安装-bvar">安装 bvar</a></li>
+      </ul>
+    </li>
+    <li><a href="#依赖-cyber-rt-的代码编译">依赖 cyber rt 的代码编译</a>
+      <ul>
+        <li><a href="#workspace">workspace</a></li>
+      </ul>
+    </li>
+    <li><a href="#monorepo-中编译">monorepo 中编译</a></li>
+  </ul>
+</nav>
+
+
+
+  </aside>
+  
+ 
+      </header>
+
+      
+      
+  <article class="markdown book-article"><h1 id="ubuntu2004源码编译cyber-rt-1000">
+  ubuntu20.04源码编译cyber rt 10.0.0
+  <a class="anchor" href="#ubuntu2004%e6%ba%90%e7%a0%81%e7%bc%96%e8%af%91cyber-rt-1000">#</a>
+</h1>
+<h2 id="安装-fastdds">
+  安装 fastdds
+  <a class="anchor" href="#%e5%ae%89%e8%a3%85-fastdds">#</a>
+</h2>
+<p>apollo 给的环境是一个 docker。third_party 里 fastdds 的 bazel build 直接通过系统路径依赖的 fastdds。</p>
+<p>自己的环境中没有，手动安装一下，看文档是说 10.0.0 升级到了 2.x 版本。</p>
+<p>参考 fastdds 官网文档安装一下。</p>
+<p><a href="https://fast-dds.docs.eprosima.com/en/latest/installation/binaries/binaries_linux.html">https://fast-dds.docs.eprosima.com/en/latest/installation/binaries/binaries_linux.html</a></p>
+<p>二进制版本，下载解压，<code>sudo install.sh</code></p>
+<ul>
+<li>装不上 python3-xmlschema
+<ul>
+<li>换成 <code>pip3 install xmlschema</code>，然后注释掉脚本里的 python3-xmlschema</li>
+</ul>
+</li>
+<li>clone foonathan_memory_vendor 报错；手动进入到该文件夹后 build 通过</li>
+<li>cmake 版本不匹配，要求最低 3.20，但是自带的是 3.16。升级麻烦，直接替换了。按照经验大部分人都是随便写个版本，实际根本没用到什么新功能。</li>
+</ul>
+<p>编译通过</p>
+<h2 id="cyber-rt">
+  cyber rt
+  <a class="anchor" href="#cyber-rt">#</a>
+</h2>
+<p>把 third_party 里的 fastdds/uuid 依赖加上。</p>
+<p>还缺 bvar。</p>
+<h3 id="安装-bvar">
+  安装 bvar
+  <a class="anchor" href="#%e5%ae%89%e8%a3%85-bvar">#</a>
+</h3>
+<p>install_pkg_repo.sh 脚本里安装的。</p>
+<div class="highlight"><div style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-0-1"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-0-1">1</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-0-2"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-0-2">2</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-0-3"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-0-3">3</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-0-4"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-0-4">4</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-0-5"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-0-5">5</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-0-6"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-0-6">6</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-0-7"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-0-7">7</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-0-8"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-0-8">8</a>
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-gdscript3" data-lang="gdscript3"><span style="display:flex;"><span><span style="color:#228b22"># 添加 Apollo 的 GPG 密钥</span>
+</span></span><span style="display:flex;"><span>curl -fsSL https://apollo-pkg-beta.cdn.bcebos.com/neo/beta/key/deb.gpg.key | sudo gpg --dearmor -o /etc/apt/keyrings/apolloauto.gpg
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#228b22"># 添加 Apollo 的软件源</span>
+</span></span><span style="display:flex;"><span>echo <span style="color:#cd5555">&#34;deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/apolloauto.gpg] https://apollo-pkg-beta.cdn.bcebos.com/apollo/core $(. /etc/os-release &amp;&amp; echo &#34;</span>$VERSION_CODENAME<span style="color:#cd5555">&#34;) main&#34;</span> | sudo tee /etc/apt/sources.list.d/apolloauto.list
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>sudo apt update
+</span></span><span style="display:flex;"><span>sudo apt-get install bvar
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>装不上，有人提 issue：</p>
+<p><a href="https://github.com/ApolloAuto/apollo/issues/15614">https://github.com/ApolloAuto/apollo/issues/15614</a></p>
+<p>这个库里有 deb：</p>
+<p><a href="https://github.com/minhanghuang/CyberRT/tree/v10.0.0-rc1">https://github.com/minhanghuang/CyberRT/tree/v10.0.0-rc1</a></p>
+<div class="highlight"><div style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-1-1"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-1-1">1</a>
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-fallback" data-lang="fallback"><span style="display:flex;"><span>sudo dpkg -i xxx.deb
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>不知为何有个这个 define，报了一堆 fastdds 的错，注释掉之后编译通过</p>
+<p><img src="assets/2024-12-26-ubuntu20.04%e6%ba%90%e7%a0%81%e7%bc%96%e8%af%91cyber%20rt%2010.0.0@cb1fd07a-58cc-4f6d-84cc-474d645d37cb.png" alt="" /></p>
+<h2 id="依赖-cyber-rt-的代码编译">
+  依赖 cyber rt 的代码编译
+  <a class="anchor" href="#%e4%be%9d%e8%b5%96-cyber-rt-%e7%9a%84%e4%bb%a3%e7%a0%81%e7%bc%96%e8%af%91">#</a>
+</h2>
+<h3 id="workspace">
+  workspace
+  <a class="anchor" href="#workspace">#</a>
+</h3>
+<div class="highlight"><div style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-2-1"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-2-1">1</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-2-2"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-2-2">2</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-2-3"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-2-3">3</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-2-4"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-2-4">4</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-2-5"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-2-5">5</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-2-6"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-2-6">6</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-2-7"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-2-7">7</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-2-8"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-2-8">8</a>
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-gdscript3" data-lang="gdscript3"><span style="display:flex;"><span>local_repository(
+</span></span><span style="display:flex;"><span>    name = <span style="color:#cd5555">&#34;apollo&#34;</span>,
+</span></span><span style="display:flex;"><span>    path = <span style="color:#cd5555">&#34;../apollo&#34;</span>,
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#228b22"># 添加 apollo 的依赖</span>
+</span></span><span style="display:flex;"><span><span style="color:#658b00">load</span>(<span style="color:#cd5555">&#34;@apollo//tools:workspace.bzl&#34;</span>, <span style="color:#cd5555">&#34;apollo_repositories&#34;</span>)
+</span></span><span style="display:flex;"><span>apollo_repositories()
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>报了 -lfastrtps 找不到的问题</p>
+<p>在 cyber rt 的库里加了下 -L</p>
+<p><img src="assets/2024-12-26-ubuntu20.04%e6%ba%90%e7%a0%81%e7%bc%96%e8%af%91cyber%20rt%2010.0.0@1113f42a-1546-4ed5-a6ff-819eafe3821e.png" alt="" /></p>
+<h2 id="monorepo-中编译">
+  monorepo 中编译
+  <a class="anchor" href="#monorepo-%e4%b8%ad%e7%bc%96%e8%af%91">#</a>
+</h2>
+<p>缺了俩环境变量：</p>
+<div class="highlight"><div style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-1"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-1">1</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-2"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-2">2</a>
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#658b00">export</span> <span style="color:#00688b">UBUNTU</span>=“2004”
+</span></span><span style="display:flex;"><span><span style="color:#658b00">export</span> <span style="color:#00688b">PLATFORM</span>=“X86<span style="color:#cd5555">&#34;
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div></article>
+ 
+      
+
+      <footer class="book-footer">
+        
+  <div class="flex flex-wrap justify-between">
+
+
+
+
+
+</div>
+
+
+
+  <script>(function(){function e(e){const t=window.getSelection(),n=document.createRange();n.selectNodeContents(e),t.removeAllRanges(),t.addRange(n)}document.querySelectorAll("pre code").forEach(t=>{t.addEventListener("click",function(){if(window.getSelection().toString())return;e(t.parentElement),navigator.clipboard&&navigator.clipboard.writeText(t.parentElement.textContent)})})})()</script>
+
+
+ 
+        
+      </footer>
+
+      
+  
+  <div class="book-comments">
+
+</div>
+  
+ 
+
+      <label for="menu-control" class="hidden book-menu-overlay"></label>
+    </div>
+
+    
+    <aside class="book-toc">
+      <div class="book-toc-content">
+        
+  
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#安装-fastdds">安装 fastdds</a></li>
+    <li><a href="#cyber-rt">cyber rt</a>
+      <ul>
+        <li><a href="#安装-bvar">安装 bvar</a></li>
+      </ul>
+    </li>
+    <li><a href="#依赖-cyber-rt-的代码编译">依赖 cyber rt 的代码编译</a>
+      <ul>
+        <li><a href="#workspace">workspace</a></li>
+      </ul>
+    </li>
+    <li><a href="#monorepo-中编译">monorepo 中编译</a></li>
+  </ul>
+</nav>
+
+
+ 
+      </div>
+    </aside>
+    
+  </main>
+
+  
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
