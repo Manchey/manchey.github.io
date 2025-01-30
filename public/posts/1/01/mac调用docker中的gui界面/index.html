@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="
+  mac上，使用docker中的gui程序
+  #
+
+
+安装XQuartz，通过XQuartz打开terminal，启动docker
+docker里设置环境变量：export DISPLAY=&lt;IP&gt;:0
+主机： xhost &#43; &lt;IP&gt;
+
+
+Reference：
+
+https://shaoguangleo.github.io/2018/01/21/docker-run-gui-on-macosx/
+https://zhuanlan.zhihu.com/p/652143343
+
+
+">
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#343a40">
+<meta name="color-scheme" content="light dark"><meta property="og:url" content="http://localhost:1313/posts/1/01/mac%E8%B0%83%E7%94%A8docker%E4%B8%AD%E7%9A%84gui%E7%95%8C%E9%9D%A2/">
+  <meta property="og:site_name" content="Manchey Blog">
+  <meta property="og:title" content="mac调用docker中的GUI界面">
+  <meta property="og:description" content="mac上，使用docker中的gui程序 # 安装XQuartz，通过XQuartz打开terminal，启动docker docker里设置环境变量：export DISPLAY=&lt;IP&gt;:0 主机： xhost &#43; &lt;IP&gt; Reference： https://shaoguangleo.github.io/2018/01/21/docker-run-gui-on-macosx/ https://zhuanlan.zhihu.com/p/652143343">
+  <meta property="og:locale" content="en_us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="post">
+    <meta property="article:tag" content="Blog">
+<title>mac调用docker中的GUI界面 | Manchey Blog</title>
+<link rel="icon" href="http://localhost:1313/logo.png" >
+<link rel="manifest" href="http://localhost:1313/manifest.json">
+<link rel="canonical" href="http://localhost:1313/posts/1/01/mac%E8%B0%83%E7%94%A8docker%E4%B8%AD%E7%9A%84gui%E7%95%8C%E9%9D%A2/">
+<link rel="stylesheet" href="http://localhost:1313/book.min.2d11051f9bbf9eb3c1e80b2b7a60b21379d1b88bdcc5a0c2b268ec9357d72f50.css" integrity="sha256-LREFH5u/nrPB6AsremCyE3nRuIvcxaDCsmjsk1fXL1A=" crossorigin="anonymous">
+  <script defer src="http://localhost:1313/fuse.min.js"></script>
+  <script defer src="http://localhost:1313/en.search.min.202c599dd138229b73a70f5225b51f437018d651488c03ce5fe7f358c1e67f0d.js" integrity="sha256-ICxZndE4Iptzpw9SJbUfQ3AY1lFIjAPOX&#43;fzWMHmfw0=" crossorigin="anonymous"></script>
+<!--
+Made with Book Theme
+https://github.com/alex-shpak/hugo-book
+-->
+  
+</head>
+<body dir="ltr">
+  <input type="checkbox" class="hidden toggle" id="menu-control" />
+  <input type="checkbox" class="hidden toggle" id="toc-control" />
+  <main class="container flex">
+    <aside class="book-menu">
+      <div class="book-menu-content">
+        
+  <nav>
+<h2 class="book-brand">
+  <a class="flex align-center" href="http://localhost:1313/"><img src="http://localhost:1313/logo.png" alt="Logo" class="book-icon" /><span>Manchey Blog</span>
+  </a>
+</h2>
+
+
+<div class="book-search hidden">
+  <input type="text" id="book-search-input" placeholder="Search" aria-label="Search" maxlength="64" data-hotkeys="s/" />
+  <div class="book-search-spinner hidden"></div>
+  <ul id="book-search-results"></ul>
+</div>
+<script>document.querySelector(".book-search").classList.remove("hidden")</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+<ul>
+  
+  <li>
+    <a href="http://localhost:1313/"  >
+        Home
+      </a>
+  </li>
+  
+  <li>
+    <a href="http://localhost:1313/post/"  >
+        Blog
+      </a>
+  </li>
+  
+  <li>
+    <a href="http://localhost:1313/about/"  >
+        About
+      </a>
+  </li>
+  
+  <li>
+    <a href="https://github.com/Manchey/manchey.github.io"  target="_blank" rel="noopener">
+        Github
+      </a>
+  </li>
+  
+</ul>
+
+
+
+
+
+
+</nav>
+
+
+
+
+  <script>(function(){var e=document.querySelector("aside .book-menu-content");addEventListener("beforeunload",function(){localStorage.setItem("menu.scrollTop",e.scrollTop)}),e.scrollTop=localStorage.getItem("menu.scrollTop")})()</script>
+
+
+ 
+      </div>
+    </aside>
+
+    <div class="book-page">
+      <header class="book-header">
+        
+  <div class="flex align-center justify-between">
+  <label for="menu-control">
+    <img src="http://localhost:1313/svg/menu.svg" class="book-icon" alt="Menu" />
+  </label>
+
+  <h3>mac调用docker中的GUI界面</h3>
+
+  <label for="toc-control">
+    
+    <img src="http://localhost:1313/svg/toc.svg" class="book-icon" alt="Table of Contents" />
+    
+  </label>
+</div>
+
+
+  
+  <aside class="hidden clearfix">
+    
+  
+<nav id="TableOfContents"></nav>
+
+
+
+  </aside>
+  
+ 
+      </header>
+
+      
+      
+  <article class="markdown book-article"><h1 id="mac上使用docker中的gui程序">
+  mac上，使用docker中的gui程序
+  <a class="anchor" href="#mac%e4%b8%8a%e4%bd%bf%e7%94%a8docker%e4%b8%ad%e7%9a%84gui%e7%a8%8b%e5%ba%8f">#</a>
+</h1>
+<ol>
+<li>安装XQuartz，通过XQuartz打开terminal，启动docker</li>
+<li>docker里设置环境变量：<code>export DISPLAY=&lt;IP&gt;:0</code></li>
+<li>主机： <code>xhost + &lt;IP&gt;</code></li>
+</ol>
+<ul>
+<li>Reference：
+<ul>
+<li><a href="https://shaoguangleo.github.io/2018/01/21/docker-run-gui-on-macosx/">https://shaoguangleo.github.io/2018/01/21/docker-run-gui-on-macosx/</a></li>
+<li><a href="https://zhuanlan.zhihu.com/p/652143343">https://zhuanlan.zhihu.com/p/652143343</a></li>
+</ul>
+</li>
+</ul>
+</article>
+ 
+      
+
+      <footer class="book-footer">
+        
+  <div class="flex flex-wrap justify-between">
+
+
+
+
+
+</div>
+
+
+
+  <script>(function(){function e(e){const t=window.getSelection(),n=document.createRange();n.selectNodeContents(e),t.removeAllRanges(),t.addRange(n)}document.querySelectorAll("pre code").forEach(t=>{t.addEventListener("click",function(){if(window.getSelection().toString())return;e(t.parentElement),navigator.clipboard&&navigator.clipboard.writeText(t.parentElement.textContent)})})})()</script>
+
+
+ 
+        
+      </footer>
+
+      
+  
+  <div class="book-comments">
+
+</div>
+  
+ 
+
+      <label for="menu-control" class="hidden book-menu-overlay"></label>
+    </div>
+
+    
+    <aside class="book-toc">
+      <div class="book-toc-content">
+        
+  
+<nav id="TableOfContents"></nav>
+
+
+ 
+      </div>
+    </aside>
+    
+  </main>
+
+  
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,18 @@
+<ul style="list-style: none; padding-left: 0;">
+    {{ range (first 25 (where .Site.RegularPages "Type" "post")) }}
+      <li style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+        <div class="archive">{{.Date.Format "2006-01-02"}}</div>
+        <a href="{{ .RelPermalink}}">{{ .Title }}</a> 
+        <div style="display: flex; gap: 4px;">
+          {{ if .Params.tags }}
+            {{range (first 3 .Params.tags)}}
+              {{ $tagColor := substr (md5 .) 0 6}}
+              <!-- hex code attach opacity to end of code, 1A is 10% opacity  -->
+              <!-- to add link here, you'd need to search Taxonomies for url, but it doesn't have chinese tag -->
+              <div class="tag tag-small" style="--tag-color: #{{$tagColor}}10; margin: 0;" >{{ . }}</div>
+            {{end }}
+          {{ end }}
+        </div>
+      </li>
+    {{ end }}
+</ul>
