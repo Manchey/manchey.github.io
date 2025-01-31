@@ -96,8 +96,20 @@ b_cluster = pipeline-&gt;createGGroup&lt;GCluster&gt;({
   <script defer src="https://manchey.github.io/fuse.min.js"></script>
   <script defer src="https://manchey.github.io/en.search.min.f5eb7e06e94822c203a80b9054e9a528440f25b32e71d6d1955036cdde189092.js" integrity="sha256-9et&#43;BulIIsIDqAuQVOmlKEQPJbMucdbRlVA2zd4YkJI=" crossorigin="anonymous"></script>
 
-
-<!--
+      <script async src="https://www.googletagmanager.com/gtag/js?id=G-4T451VBM9P"></script>
+      <script>
+        var doNotTrack = false;
+        if ( false ) {
+          var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
+          var doNotTrack = (dnt == "1" || dnt == "yes");
+        }
+        if (!doNotTrack) {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-4T451VBM9P');
+        }
+      </script><!--
 Made with Book Theme
 https://github.com/alex-shpak/hugo-book
 -->
@@ -939,7 +951,20 @@ tp-&gt;submit([i] { std::cout &lt;&lt; i &lt;&lt; &quot; &quot;; });    // ÂèØ‰ª
   
   <div class="book-comments">
 
-</div>
+<div class="book-tabs-content markdown-inner">
+    <div id="tcomment"></div>
+        <script src="https://cdn.jsdelivr.net/npm/twikoo@1.6.39/dist/twikoo.all.min.js"></script>
+        <script>
+            twikoo.init({
+            envId: 'https://douchi.netlify.app/.netlify/functions/twikoo', 
+            el: '#tcomment', 
+            
+            
+            lang: 'zh-CN', 
+            })
+        </script>
+    </div>
+</div></div>
   
  
 
