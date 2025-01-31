@@ -1,7 +1,7 @@
 ---
 title: Home
 type: docs
-BookComments: False
+BookComments: false
 bookToc: false
 menu:
   after:

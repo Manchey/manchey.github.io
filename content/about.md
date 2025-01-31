@@ -4,6 +4,7 @@ menu:
   after:
     name: about
     weight: 40
+BookComments: false
 ---
 
 Manchey Lee
