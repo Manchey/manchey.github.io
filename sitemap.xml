@@ -2,6 +2,9 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
+    <loc>https://manchey.github.io/posts/2025/03/ros2%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/</loc>
+    <lastmod>2025-03-15T00:00:00+00:00</lastmod>
+  </url><url>
     <loc>https://manchey.github.io/diary/2025-01-30/</loc>
     <lastmod>2025-01-30T23:23:29+08:00</lastmod>
   </url><url>
@@ -25,9 +28,6 @@
   </url><url>
     <loc>https://manchey.github.io/tags/tech/cpp/scheduler/cgraph/</loc>
     <lastmod>2024-12-25T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://manchey.github.io/posts/2024/12/mac%E4%B8%ADvscode%E6%89%93%E5%BC%80devdocker%E6%8F%90%E7%A4%BAremote-extension-host-terminated-unexpectedly/</loc>
-    <lastmod>2024-12-19T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://manchey.github.io/about/</loc>
     <lastmod>2025-01-31T15:56:16+08:00</lastmod>

@@ -17,7 +17,7 @@
 <link rel="canonical" href="https://manchey.github.io/post/">
 <link rel="stylesheet" href="https://manchey.github.io/book.min.2d11051f9bbf9eb3c1e80b2b7a60b21379d1b88bdcc5a0c2b268ec9357d72f50.css" integrity="sha256-LREFH5u/nrPB6AsremCyE3nRuIvcxaDCsmjsk1fXL1A=" crossorigin="anonymous">
   <script defer src="https://manchey.github.io/fuse.min.js"></script>
-  <script defer src="https://manchey.github.io/en.search.min.f5eb7e06e94822c203a80b9054e9a528440f25b32e71d6d1955036cdde189092.js" integrity="sha256-9et&#43;BulIIsIDqAuQVOmlKEQPJbMucdbRlVA2zd4YkJI=" crossorigin="anonymous"></script>
+  <script defer src="https://manchey.github.io/en.search.min.fa403e6f38f758cd7e6a0b6104fbda0c17d2d15ad162232fb7aa4e8719cd1c87.js" integrity="sha256-&#43;kA&#43;bzj3WM1&#43;agthBPvaDBfS0VrRYiMvt6pOhxnNHIc=" crossorigin="anonymous"></script>
 
       <script async src="https://www.googletagmanager.com/gtag/js?id=G-4T451VBM9P"></script>
       <script>
@@ -174,7 +174,7 @@ https://github.com/alex-shpak/hugo-book
       
         <li class="flex justify-between">
           <a href="https://manchey.github.io/tags/blog/">Blog</a>
-          <span>2</span>
+          <span>1</span>
         </li>
       
         <li class="flex justify-between">
@@ -197,6 +197,95 @@ https://github.com/alex-shpak/hugo-book
 
       
       
+  
+  <article class="markdown book-post">
+    <h2>
+      <a href="https://manchey.github.io/posts/2025/03/ros2%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/">ros2开发环境搭建</a>
+    </h2>
+    
+  <div class="flex align-center text-small book-post-date">
+    <img src="https://manchey.github.io/svg/calendar.svg" class="book-icon " alt="" />
+    <span>March 15, 2025</span>
+  </div>
+
+
+
+  
+
+  
+
+
+    <div class="book-post-content"><p>最近想做些 ros2 相关的开发。记录一下本地配置的过程。 因为想开发调试 rclcpp 等中间件层的代码，而不只是做上层应用开发，所以选择了 build from source。</p>
+<p>个人开发习惯是 docker + 本地文件夹映射进 docker。</p>
+<h2 id="repo-拉取代码">
+  repo 拉取代码
+  <a class="anchor" href="#repo-%e6%8b%89%e5%8f%96%e4%bb%a3%e7%a0%81">#</a>
+</h2>
+<p>官方默认是用 vcs 拉的代码，比较习惯 repo 工具管理多仓库，改了一版 repo manifest.xml：https://github.com/Manchey/ros2-repo-manifest/tree/master</p>
+<h3 id="repo-改用清华源">
+  repo 改用清华源
+  <a class="anchor" href="#repo-%e6%94%b9%e7%94%a8%e6%b8%85%e5%8d%8e%e6%ba%90">#</a>
+</h3>
+<div class="highlight"><div style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-0-1"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-0-1">1</a>
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#658b00">export</span> <span style="color:#00688b">REPO_URL</span>=<span style="color:#cd5555">&#39;https://mirrors.tuna.tsinghua.edu.cn/git/git-repo&#39;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>repo sync 时也可能 git 拉取报错，默认也许没走 vpn。可以配一下 http_proxy。</p>
+<div class="highlight"><div style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-1-1"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-1-1"> 1</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-1-2"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-1-2"> 2</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-1-3"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-1-3"> 3</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-1-4"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-1-4"> 4</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-1-5"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-1-5"> 5</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-1-6"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-1-6"> 6</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-1-7"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-1-7"> 7</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-1-8"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-1-8"> 8</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-1-9"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-1-9"> 9</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-1-10"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-1-10">10</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-1-11"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-1-11">11</a>
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#228b22"># HTTP 代理</span>
+</span></span><span style="display:flex;"><span><span style="color:#658b00">export</span> <span style="color:#00688b">http_proxy</span>=http://127.0.0.1:你的代理端口
+</span></span><span style="display:flex;"><span><span style="color:#658b00">export</span> <span style="color:#00688b">https_proxy</span>=http://127.0.0.1:你的代理端口
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#228b22"># 或 socks5 代理</span>
+</span></span><span style="display:flex;"><span><span style="color:#658b00">export</span> <span style="color:#00688b">http_proxy</span>=socks5://127.0.0.1:你的代理端口
+</span></span><span style="display:flex;"><span><span style="color:#658b00">export</span> <span style="color:#00688b">https_proxy</span>=socks5://127.0.0.1:你的代理端口
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#228b22"># for me:</span>
+</span></span><span style="display:flex;"><span><span style="color:#658b00">export</span> <span style="color:#00688b">http_proxy</span>=socks5://127.0.0.1:7891
+</span></span><span style="display:flex;"><span><span style="color:#658b00">export</span> <span style="color:#00688b">https_proxy</span>=socks5://127.0.0.1:7891
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="拉取代码">
+  拉取代码
+  <a class="anchor" href="#%e6%8b%89%e5%8f%96%e4%bb%a3%e7%a0%81">#</a>
+</h3>
+<div class="highlight"><div style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-2-1"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-2-1">1</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-2-2"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-2-2">2</a>
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>repo init -u https://github.com/Manchey/ros2-repo-manifest -b master
+</span></span><span style="display:flex;"><span>repo sync -j8
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="准备开发-docker">
+  准备开发 docker
+  <a class="anchor" href="#%e5%87%86%e5%a4%87%e5%bc%80%e5%8f%91-docker">#</a>
+</h2>
+<p>docker 参考了 ros2 官方提供了 devel docker 镜像：</p>
+        <a href="https://manchey.github.io/posts/2025/03/ros2%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/">...</a>
+      
+    </div>
+  </article>
   
   <article class="markdown book-post">
     <h2>
@@ -369,79 +458,6 @@ https://github.com/alex-shpak/hugo-book
     </div>
   </article>
   
-  <article class="markdown book-post">
-    <h2>
-      <a href="https://manchey.github.io/posts/2025/01/vim%E6%A0%B9%E6%8D%AE%E6%A8%A1%E5%BC%8F%E5%88%87%E6%8D%A2%E8%BE%93%E5%85%A5%E6%B3%95/">vim根据模式切换输入法</a>
-    </h2>
-    
-  <div class="flex align-center text-small book-post-date">
-    <img src="https://manchey.github.io/svg/calendar.svg" class="book-icon " alt="" />
-    <span>January 4, 2025</span>
-  </div>
-
-
-
-  
-
-  
-
-
-    <div class="book-post-content"><h1 id="vim根据模式切换输入法">
-  vim根据模式切换输入法
-  <a class="anchor" href="#vim%e6%a0%b9%e6%8d%ae%e6%a8%a1%e5%bc%8f%e5%88%87%e6%8d%a2%e8%be%93%e5%85%a5%e6%b3%95">#</a>
-</h1>
-<p>参考： <a href="99_Archive/macOS%e4%b8%8bvim%20%e4%b8%ad%e6%96%87%e8%be%93%e5%85%a5%e6%b3%95%e5%88%87%e6%8d%a2%e9%97%ae%e9%a2%98%e5%92%8c%e4%b8%a4%e7%a7%8d%e8%a7%a3%e5%86%b3%e6%96%b9%e6%a1%88_mac%20vim%20%e8%be%93%e5%85%a5%e6%b3%95%e8%87%aa%e5%8a%a8%e5%88%87%e6%8d%a2-CSDN%e5%8d%9a%e5%ae%a2.md">macOS下vim 中文输入法切换问题和两种解决方案_mac vim 输入法自动切换-CSDN博客</a></p>
-<ol>
-<li>
-<p>vim 安装 smartim 插件</p>
-<ul>
-<li>
-<p>加入一行到 <code>~/.vimrc</code> 文件:</p>
-<div class="highlight"><div style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
-<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-0-1"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-0-1">1</a>
-</span></code></pre></td>
-<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>Plugin <span style="color:#cd5555">&#39;ybian/smartim&#39;</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div></li>
-<li>
-<p>运行：<code>:PluginInstall</code></p>
-</li>
-</ul>
-</li>
-<li>
-<p>修改 <code>~/.vimrc</code></p>
-</li>
-</ol>
-<div class="highlight"><div style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
-<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-1-1"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-1-1">1</a>
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-1-2"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-1-2">2</a>
-</span></code></pre></td>
-<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-fallback" data-lang="fallback"><span style="display:flex;"><span>&#34; 设置normal模式切换到的输入法
-</span></span><span style="display:flex;"><span>let g:smartim_default = &#39;com.apple.keylayout.US&#39;
-</span></span></code></pre></td></tr></table>
-</div>
-</div><ol start="3">
-<li>因为习惯 ctrl-c 切换，上面这个只支持 esc 切换。加一下键位映射</li>
-</ol>
-<div class="highlight"><div style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
-<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-2-1"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-2-1">1</a>
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-2-2"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-2-2">2</a>
-</span></code></pre></td>
-<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-fallback" data-lang="fallback"><span style="display:flex;"><span>&#34; ctrl-c 映射到 esc
-</span></span><span style="display:flex;"><span>inoremap &lt;C-c&gt; &lt;esc&gt;
-</span></span></code></pre></td></tr></table>
-</div>
-</div>
-    </div>
-  </article>
-  
 
   
     <ul class="pagination pagination-default">
@@ -519,7 +535,7 @@ https://github.com/alex-shpak/hugo-book
       
         <li class="flex justify-between">
           <a href="https://manchey.github.io/tags/blog/">Blog</a>
-          <span>2</span>
+          <span>1</span>
         </li>
       
         <li class="flex justify-between">

@@ -1,0 +1,1085 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="最近想做些 ros2 相关的开发。记录一下本地配置的过程。 因为想开发调试 rclcpp 等中间件层的代码，而不只是做上层应用开发，所以选择了 build from source。
+个人开发习惯是 docker &#43; 本地文件夹映射进 docker。
+
+  repo 拉取代码
+  #
+
+官方默认是用 vcs 拉的代码，比较习惯 repo 工具管理多仓库，改了一版 repo manifest.xml：https://github.com/Manchey/ros2-repo-manifest/tree/master
+
+  repo 改用清华源
+  #
+
+
+
+1
+
+
+export REPO_URL=&#39;https://mirrors.tuna.tsinghua.edu.cn/git/git-repo&#39;
+
+
+repo sync 时也可能 git 拉取报错，默认也许没走 vpn。可以配一下 http_proxy。
+
+
+ 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+
+
+# HTTP 代理
+export http_proxy=http://127.0.0.1:你的代理端口
+export https_proxy=http://127.0.0.1:你的代理端口
+
+# 或 socks5 代理
+export http_proxy=socks5://127.0.0.1:你的代理端口
+export https_proxy=socks5://127.0.0.1:你的代理端口
+
+# for me:
+export http_proxy=socks5://127.0.0.1:7891
+export https_proxy=socks5://127.0.0.1:7891
+
+
+
+  拉取代码
+  #
+
+
+
+1
+2
+
+
+repo init -u https://github.com/Manchey/ros2-repo-manifest -b master
+repo sync -j8
+
+
+
+  准备开发 docker
+  #
+
+docker 参考了 ros2 官方提供了 devel docker 镜像：">
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#343a40">
+<meta name="color-scheme" content="light dark"><meta property="og:url" content="https://manchey.github.io/posts/2025/03/ros2%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/">
+  <meta property="og:site_name" content="Manchey Blog">
+  <meta property="og:title" content="ros2开发环境搭建">
+  <meta property="og:description" content="最近想做些 ros2 相关的开发。记录一下本地配置的过程。 因为想开发调试 rclcpp 等中间件层的代码，而不只是做上层应用开发，所以选择了 build from source。
+个人开发习惯是 docker &#43; 本地文件夹映射进 docker。
+repo 拉取代码 # 官方默认是用 vcs 拉的代码，比较习惯 repo 工具管理多仓库，改了一版 repo manifest.xml：https://github.com/Manchey/ros2-repo-manifest/tree/master
+repo 改用清华源 # 1 export REPO_URL=&#39;https://mirrors.tuna.tsinghua.edu.cn/git/git-repo&#39; repo sync 时也可能 git 拉取报错，默认也许没走 vpn。可以配一下 http_proxy。
+1 2 3 4 5 6 7 8 9 10 11 # HTTP 代理 export http_proxy=http://127.0.0.1:你的代理端口 export https_proxy=http://127.0.0.1:你的代理端口 # 或 socks5 代理 export http_proxy=socks5://127.0.0.1:你的代理端口 export https_proxy=socks5://127.0.0.1:你的代理端口 # for me: export http_proxy=socks5://127.0.0.1:7891 export https_proxy=socks5://127.0.0.1:7891 拉取代码 # 1 2 repo init -u https://github.com/Manchey/ros2-repo-manifest -b master repo sync -j8 准备开发 docker # docker 参考了 ros2 官方提供了 devel docker 镜像：">
+  <meta property="og:locale" content="en_us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="post">
+    <meta property="article:published_time" content="2025-03-15T00:00:00+00:00">
+    <meta property="article:modified_time" content="2025-03-15T00:00:00+00:00">
+<title>ros2开发环境搭建 | Manchey Blog</title>
+<link rel="icon" href="https://manchey.github.io/logo.png" >
+<link rel="manifest" href="https://manchey.github.io/manifest.json">
+<link rel="canonical" href="https://manchey.github.io/posts/2025/03/ros2%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/">
+<link rel="stylesheet" href="https://manchey.github.io/book.min.2d11051f9bbf9eb3c1e80b2b7a60b21379d1b88bdcc5a0c2b268ec9357d72f50.css" integrity="sha256-LREFH5u/nrPB6AsremCyE3nRuIvcxaDCsmjsk1fXL1A=" crossorigin="anonymous">
+  <script defer src="https://manchey.github.io/fuse.min.js"></script>
+  <script defer src="https://manchey.github.io/en.search.min.fa403e6f38f758cd7e6a0b6104fbda0c17d2d15ad162232fb7aa4e8719cd1c87.js" integrity="sha256-&#43;kA&#43;bzj3WM1&#43;agthBPvaDBfS0VrRYiMvt6pOhxnNHIc=" crossorigin="anonymous"></script>
+
+      <script async src="https://www.googletagmanager.com/gtag/js?id=G-4T451VBM9P"></script>
+      <script>
+        var doNotTrack = false;
+        if ( false ) {
+          var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
+          var doNotTrack = (dnt == "1" || dnt == "yes");
+        }
+        if (!doNotTrack) {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-4T451VBM9P');
+        }
+      </script><!--
+Made with Book Theme
+https://github.com/alex-shpak/hugo-book
+-->
+  
+</head>
+<body dir="ltr">
+  <input type="checkbox" class="hidden toggle" id="menu-control" />
+  <input type="checkbox" class="hidden toggle" id="toc-control" />
+  <main class="container flex">
+    <aside class="book-menu">
+      <div class="book-menu-content">
+        
+  <nav>
+<h2 class="book-brand">
+  <a class="flex align-center" href="https://manchey.github.io/"><img src="https://manchey.github.io/logo.png" alt="Logo" class="book-icon" /><span>Manchey Blog</span>
+  </a>
+</h2>
+
+
+<div class="book-search hidden">
+  <input type="text" id="book-search-input" placeholder="Search" aria-label="Search" maxlength="64" data-hotkeys="s/" />
+  <div class="book-search-spinner hidden"></div>
+  <ul id="book-search-results"></ul>
+</div>
+<script>document.querySelector(".book-search").classList.remove("hidden")</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+<ul>
+  
+  <li>
+    <a href="https://manchey.github.io/"  >
+        Home
+      </a>
+  </li>
+  
+  <li>
+    <a href="https://manchey.github.io/post/"  >
+        Blog
+      </a>
+  </li>
+  
+  <li>
+    <a href="https://manchey.github.io/diary/"  >
+        Diary
+      </a>
+  </li>
+  
+  <li>
+    <a href="https://manchey.github.io/about/"  >
+        About
+      </a>
+  </li>
+  
+  <li>
+    <a href="https://github.com/Manchey/manchey.github.io"  target="_blank" rel="noopener">
+        Github
+      </a>
+  </li>
+  
+</ul>
+
+
+
+
+
+
+</nav>
+
+
+
+
+  <script>(function(){var e=document.querySelector("aside .book-menu-content");addEventListener("beforeunload",function(){localStorage.setItem("menu.scrollTop",e.scrollTop)}),e.scrollTop=localStorage.getItem("menu.scrollTop")})()</script>
+
+
+ 
+      </div>
+    </aside>
+
+    <div class="book-page">
+      <header class="book-header">
+        
+  <div class="flex align-center justify-between">
+  <label for="menu-control">
+    <img src="https://manchey.github.io/svg/menu.svg" class="book-icon" alt="Menu" />
+  </label>
+
+  <h3>ros2开发环境搭建</h3>
+
+  <label for="toc-control">
+    
+    <img src="https://manchey.github.io/svg/toc.svg" class="book-icon" alt="Table of Contents" />
+    
+  </label>
+</div>
+
+
+  
+  <aside class="hidden clearfix">
+    
+  
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#repo-拉取代码">repo 拉取代码</a>
+      <ul>
+        <li><a href="#repo-改用清华源">repo 改用清华源</a></li>
+        <li><a href="#拉取代码">拉取代码</a></li>
+      </ul>
+    </li>
+    <li><a href="#准备开发-docker">准备开发 docker</a>
+      <ul>
+        <li><a href="#改清华源">改清华源</a></li>
+        <li><a href="#最后完整的镜像-docker">最后完整的镜像 Docker</a></li>
+      </ul>
+    </li>
+    <li><a href="#build-docker--run">build docker &amp; run</a></li>
+  </ul>
+</nav>
+
+
+
+  </aside>
+  
+ 
+      </header>
+
+      
+      
+  <article class="markdown book-article"><p>最近想做些 ros2 相关的开发。记录一下本地配置的过程。 因为想开发调试 rclcpp 等中间件层的代码，而不只是做上层应用开发，所以选择了 build from source。</p>
+<p>个人开发习惯是 docker + 本地文件夹映射进 docker。</p>
+<h2 id="repo-拉取代码">
+  repo 拉取代码
+  <a class="anchor" href="#repo-%e6%8b%89%e5%8f%96%e4%bb%a3%e7%a0%81">#</a>
+</h2>
+<p>官方默认是用 vcs 拉的代码，比较习惯 repo 工具管理多仓库，改了一版 repo manifest.xml：https://github.com/Manchey/ros2-repo-manifest/tree/master</p>
+<h3 id="repo-改用清华源">
+  repo 改用清华源
+  <a class="anchor" href="#repo-%e6%94%b9%e7%94%a8%e6%b8%85%e5%8d%8e%e6%ba%90">#</a>
+</h3>
+<div class="highlight"><div style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-0-1"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-0-1">1</a>
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#658b00">export</span> <span style="color:#00688b">REPO_URL</span>=<span style="color:#cd5555">&#39;https://mirrors.tuna.tsinghua.edu.cn/git/git-repo&#39;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>repo sync 时也可能 git 拉取报错，默认也许没走 vpn。可以配一下 http_proxy。</p>
+<div class="highlight"><div style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-1-1"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-1-1"> 1</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-1-2"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-1-2"> 2</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-1-3"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-1-3"> 3</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-1-4"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-1-4"> 4</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-1-5"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-1-5"> 5</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-1-6"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-1-6"> 6</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-1-7"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-1-7"> 7</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-1-8"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-1-8"> 8</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-1-9"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-1-9"> 9</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-1-10"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-1-10">10</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-1-11"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-1-11">11</a>
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#228b22"># HTTP 代理</span>
+</span></span><span style="display:flex;"><span><span style="color:#658b00">export</span> <span style="color:#00688b">http_proxy</span>=http://127.0.0.1:你的代理端口
+</span></span><span style="display:flex;"><span><span style="color:#658b00">export</span> <span style="color:#00688b">https_proxy</span>=http://127.0.0.1:你的代理端口
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#228b22"># 或 socks5 代理</span>
+</span></span><span style="display:flex;"><span><span style="color:#658b00">export</span> <span style="color:#00688b">http_proxy</span>=socks5://127.0.0.1:你的代理端口
+</span></span><span style="display:flex;"><span><span style="color:#658b00">export</span> <span style="color:#00688b">https_proxy</span>=socks5://127.0.0.1:你的代理端口
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#228b22"># for me:</span>
+</span></span><span style="display:flex;"><span><span style="color:#658b00">export</span> <span style="color:#00688b">http_proxy</span>=socks5://127.0.0.1:7891
+</span></span><span style="display:flex;"><span><span style="color:#658b00">export</span> <span style="color:#00688b">https_proxy</span>=socks5://127.0.0.1:7891
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="拉取代码">
+  拉取代码
+  <a class="anchor" href="#%e6%8b%89%e5%8f%96%e4%bb%a3%e7%a0%81">#</a>
+</h3>
+<div class="highlight"><div style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-2-1"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-2-1">1</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-2-2"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-2-2">2</a>
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>repo init -u https://github.com/Manchey/ros2-repo-manifest -b master
+</span></span><span style="display:flex;"><span>repo sync -j8
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="准备开发-docker">
+  准备开发 docker
+  <a class="anchor" href="#%e5%87%86%e5%a4%87%e5%bc%80%e5%8f%91-docker">#</a>
+</h2>
+<p>docker 参考了 ros2 官方提供了 devel docker 镜像：</p>
+<ul>
+<li><a href="https://github.com/osrf/docker_images/blob/master/ros2/source/devel/Dockerfile">https://github.com/osrf/docker_images/blob/master/ros2/source/devel/Dockerfile</a></li>
+</ul>
+<div class="highlight"><div style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-1"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-1"> 1</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-2"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-2"> 2</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-3"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-3"> 3</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-4"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-4"> 4</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-5"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-5"> 5</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-6"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-6"> 6</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-7"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-7"> 7</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-8"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-8"> 8</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-9"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-9"> 9</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-10"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-10">10</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-11"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-11">11</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-12"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-12">12</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-13"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-13">13</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-14"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-14">14</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-15"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-15">15</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-16"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-16">16</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-17"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-17">17</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-18"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-18">18</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-19"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-19">19</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-20"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-20">20</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-21"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-21">21</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-22"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-22">22</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-23"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-23">23</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-24"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-24">24</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-25"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-25">25</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-26"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-26">26</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-27"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-27">27</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-28"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-28">28</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-29"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-29">29</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-30"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-30">30</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-31"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-31">31</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-32"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-32">32</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-33"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-33">33</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-34"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-34">34</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-35"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-35">35</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-36"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-36">36</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-37"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-37">37</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-38"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-38">38</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-39"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-39">39</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-40"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-40">40</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-41"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-41">41</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-42"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-42">42</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-43"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-43">43</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-44"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-44">44</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-45"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-45">45</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-46"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-46">46</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-47"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-47">47</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-48"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-48">48</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-49"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-49">49</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-50"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-50">50</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-51"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-51">51</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-52"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-52">52</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-53"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-53">53</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-54"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-54">54</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-55"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-55">55</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-56"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-56">56</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-57"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-57">57</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-58"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-58">58</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-59"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-59">59</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-60"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-60">60</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-61"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-61">61</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-62"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-62">62</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-63"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-63">63</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-64"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-64">64</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-65"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-65">65</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-66"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-66">66</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-67"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-67">67</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-68"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-68">68</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-69"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-69">69</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-70"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-70">70</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-71"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-71">71</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-72"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-72">72</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-73"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-73">73</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-74"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-74">74</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-75"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-75">75</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-76"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-76">76</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-77"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-77">77</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-78"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-78">78</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-79"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-79">79</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-80"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-80">80</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-81"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-81">81</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-82"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-82">82</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-83"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-83">83</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-84"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-84">84</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-85"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-85">85</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-86"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-86">86</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-87"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-87">87</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-88"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-88">88</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-89"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-89">89</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-90"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-90">90</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-91"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-91">91</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-92"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-92">92</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-93"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-93">93</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-94"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-94">94</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-95"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-95">95</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-96"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-96">96</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-97"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-97">97</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-3-98"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-3-98">98</a>
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-gdscript3" data-lang="gdscript3"><span style="display:flex;"><span>FROM ubuntu:noble-<span style="color:#b452cd">20250127</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#228b22"># setup timezone</span>
+</span></span><span style="display:flex;"><span>RUN echo <span style="color:#cd5555">&#39;Etc/UTC&#39;</span> &gt; /etc/timezone &amp;&amp; \
+</span></span><span style="display:flex;"><span>    ln -s /usr/share/zoneinfo/Etc/UTC /etc/localtime &amp;&amp; \
+</span></span><span style="display:flex;"><span>    apt-get update &amp;&amp; \
+</span></span><span style="display:flex;"><span>    apt-get install -q -y --no-install-recommends tzdata &amp;&amp; \
+</span></span><span style="display:flex;"><span>    rm -rf /<span style="color:#8b008b;font-weight:bold">var</span>/lib/apt/lists/*
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#228b22"># install packages</span>
+</span></span><span style="display:flex;"><span>RUN apt-get update &amp;&amp; apt-get install -q -y --no-install-recommends \
+</span></span><span style="display:flex;"><span>    bash-completion \
+</span></span><span style="display:flex;"><span>    dirmngr \
+</span></span><span style="display:flex;"><span>    gnupg2 \
+</span></span><span style="display:flex;"><span>    python3-argcomplete \
+</span></span><span style="display:flex;"><span>    python3-flake8 \
+</span></span><span style="display:flex;"><span>    python3-flake8-blind-except \
+</span></span><span style="display:flex;"><span>    python3-flake8-builtins \
+</span></span><span style="display:flex;"><span>    python3-flake8-<span style="color:#8b008b;font-weight:bold">class</span>-newline \
+</span></span><span style="display:flex;"><span>    python3-flake8-comprehensions \
+</span></span><span style="display:flex;"><span>    python3-flake8-deprecated \
+</span></span><span style="display:flex;"><span>    python3-flake8-docstrings \
+</span></span><span style="display:flex;"><span>    python3-flake8-import-order \
+</span></span><span style="display:flex;"><span>    python3-flake8-quotes \
+</span></span><span style="display:flex;"><span>    python3-pip \
+</span></span><span style="display:flex;"><span>    python3-pytest-cov \
+</span></span><span style="display:flex;"><span>    python3-pytest-mock \
+</span></span><span style="display:flex;"><span>    python3-pytest-repeat \
+</span></span><span style="display:flex;"><span>    python3-pytest-rerunfailures \
+</span></span><span style="display:flex;"><span>    python3-pytest-runner \
+</span></span><span style="display:flex;"><span>    python3-pytest-timeout \
+</span></span><span style="display:flex;"><span>    &amp;&amp; rm -rf /<span style="color:#8b008b;font-weight:bold">var</span>/lib/apt/lists/*
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#228b22"># setup keys</span>
+</span></span><span style="display:flex;"><span>RUN set -eux; \
+</span></span><span style="display:flex;"><span>       key=<span style="color:#cd5555">&#39;C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654&#39;</span>; \
+</span></span><span style="display:flex;"><span>       <span style="color:#8b008b;font-weight:bold">export</span> GNUPGHOME=<span style="color:#cd5555">&#34;$(mktemp -d)&#34;</span>; \
+</span></span><span style="display:flex;"><span>       gpg --batch --keyserver keyserver.ubuntu.com --recv-keys <span style="color:#cd5555">&#34;$key&#34;</span>; \
+</span></span><span style="display:flex;"><span>       mkdir -p /usr/share/keyrings; \
+</span></span><span style="display:flex;"><span>       gpg --batch --<span style="color:#8b008b;font-weight:bold">export</span> <span style="color:#cd5555">&#34;$key&#34;</span> &gt; /usr/share/keyrings/ros2-latest-archive-keyring.gpg; \
+</span></span><span style="display:flex;"><span>       gpgconf --kill all; \
+</span></span><span style="display:flex;"><span>       rm -rf <span style="color:#cd5555">&#34;$GNUPGHOME&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#228b22"># setup sources.list</span>
+</span></span><span style="display:flex;"><span>RUN echo <span style="color:#cd5555">&#34;deb [ signed-by=/usr/share/keyrings/ros2-latest-archive-keyring.gpg ] http://packages.ros.org/ros2/ubuntu noble main&#34;</span> &gt; /etc/apt/sources.list.d/ros2-latest.list
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#228b22"># setup environment</span>
+</span></span><span style="display:flex;"><span>ENV LANG C.UTF-<span style="color:#b452cd">8</span>
+</span></span><span style="display:flex;"><span>ENV LC_ALL C.UTF-<span style="color:#b452cd">8</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#228b22"># install bootstrap tools</span>
+</span></span><span style="display:flex;"><span>RUN apt-get update &amp;&amp; apt-get install --no-install-recommends -y \
+</span></span><span style="display:flex;"><span>    build-essential \
+</span></span><span style="display:flex;"><span>    git \
+</span></span><span style="display:flex;"><span>    python3-colcon-common-extensions \
+</span></span><span style="display:flex;"><span>    python3-colcon-mixin \
+</span></span><span style="display:flex;"><span>    python3-rosdep \
+</span></span><span style="display:flex;"><span>    python3-setuptools \
+</span></span><span style="display:flex;"><span>    python3-vcstool \
+</span></span><span style="display:flex;"><span>    &amp;&amp; rm -rf /<span style="color:#8b008b;font-weight:bold">var</span>/lib/apt/lists/*
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#228b22"># This is a workaround for pytest not found causing builds to fail</span>
+</span></span><span style="display:flex;"><span><span style="color:#228b22"># Following RUN statements tests for regression of https://github.com/ros2/ros2/issues/722</span>
+</span></span><span style="display:flex;"><span>RUN pip3 freeze | grep pytest \
+</span></span><span style="display:flex;"><span>    &amp;&amp; python3 -m pytest --version
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#228b22"># bootstrap rosdep</span>
+</span></span><span style="display:flex;"><span>RUN rosdep init \
+</span></span><span style="display:flex;"><span>    &amp;&amp; rosdep update
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#228b22"># setup colcon mixin and metadata</span>
+</span></span><span style="display:flex;"><span>RUN colcon mixin add default \
+</span></span><span style="display:flex;"><span>      https://raw.githubusercontent.com/colcon/colcon-mixin-repository/master/index.yaml &amp;&amp; \
+</span></span><span style="display:flex;"><span>    colcon mixin update &amp;&amp; \
+</span></span><span style="display:flex;"><span>    colcon metadata add default \
+</span></span><span style="display:flex;"><span>      https://raw.githubusercontent.com/colcon/colcon-metadata-repository/master/index.yaml &amp;&amp; \
+</span></span><span style="display:flex;"><span>    colcon metadata update
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#228b22"># clone source</span>
+</span></span><span style="display:flex;"><span>ENV ROS2_WS /opt/ros2_ws
+</span></span><span style="display:flex;"><span>RUN mkdir -p $ROS2_WS/src
+</span></span><span style="display:flex;"><span>WORKDIR $ROS2_WS
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#228b22"># build source</span>
+</span></span><span style="display:flex;"><span>RUN colcon \
+</span></span><span style="display:flex;"><span>    build \
+</span></span><span style="display:flex;"><span>    --cmake-args \
+</span></span><span style="display:flex;"><span>      -DSECURITY=ON --no-warn-unused-cli \
+</span></span><span style="display:flex;"><span>    --symlink-install
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#228b22"># setup bashrc</span>
+</span></span><span style="display:flex;"><span>RUN cp /etc/skel/.bashrc ~/
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#228b22"># setup entrypoint</span>
+</span></span><span style="display:flex;"><span>COPY ./ros_entrypoint.sh /
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>ENTRYPOINT [<span style="color:#cd5555">&#34;/ros_entrypoint.sh&#34;</span>]
+</span></span><span style="display:flex;"><span>CMD [<span style="color:#cd5555">&#34;bash&#34;</span>]
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="改清华源">
+  改清华源
+  <a class="anchor" href="#%e6%94%b9%e6%b8%85%e5%8d%8e%e6%ba%90">#</a>
+</h3>
+<p>其中有几处受限于网络环境经常失败，可以改一下清华源：</p>
+<h4 id="ubuntu-ports-改清华源">
+  ubuntu ports 改清华源
+  <a class="anchor" href="#ubuntu-ports-%e6%94%b9%e6%b8%85%e5%8d%8e%e6%ba%90">#</a>
+</h4>
+<div class="highlight"><div style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-4-1"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-4-1"> 1</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-4-2"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-4-2"> 2</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-4-3"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-4-3"> 3</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-4-4"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-4-4"> 4</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-4-5"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-4-5"> 5</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-4-6"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-4-6"> 6</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-4-7"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-4-7"> 7</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-4-8"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-4-8"> 8</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-4-9"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-4-9"> 9</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-4-10"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-4-10">10</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-4-11"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-4-11">11</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-4-12"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-4-12">12</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-4-13"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-4-13">13</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-4-14"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-4-14">14</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-4-15"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-4-15">15</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-4-16"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-4-16">16</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-4-17"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-4-17">17</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-4-18"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-4-18">18</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-4-19"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-4-19">19</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-4-20"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-4-20">20</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-4-21"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-4-21">21</a>
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-gdscript3" data-lang="gdscript3"><span style="display:flex;"><span><span style="color:#228b22"># First install ca-certificates to handle HTTPS sources</span>
+</span></span><span style="display:flex;"><span>RUN apt-get update &amp;&amp; apt-get install -y ca-certificates &amp;&amp; rm -rf /<span style="color:#8b008b;font-weight:bold">var</span>/lib/apt/lists/*
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#228b22"># setup timezone and change apt source to Tsinghua mirror</span>
+</span></span><span style="display:flex;"><span><span style="color:#228b22"># https://mirrors.tuna.tsinghua.edu.cn/help/ubuntu-ports/</span>
+</span></span><span style="display:flex;"><span>RUN echo <span style="color:#cd5555">&#39;Etc/UTC&#39;</span> &gt; /etc/timezone &amp;&amp; \
+</span></span><span style="display:flex;"><span>    ln -s /usr/share/zoneinfo/Etc/UTC /etc/localtime &amp;&amp; \
+</span></span><span style="display:flex;"><span>    echo <span style="color:#cd5555">&#39;Types: deb</span><span style="color:#cd5555">\n\
+</span></span></span><span style="display:flex;"><span><span style="color:#cd5555"></span><span style="color:#cd5555">URIs: https://mirrors.tuna.tsinghua.edu.cn/ubuntu-ports</span><span style="color:#cd5555">\n\
+</span></span></span><span style="display:flex;"><span><span style="color:#cd5555"></span><span style="color:#cd5555">Suites: noble noble-updates noble-backports</span><span style="color:#cd5555">\n\
+</span></span></span><span style="display:flex;"><span><span style="color:#cd5555"></span><span style="color:#cd5555">Components: main restricted universe multiverse</span><span style="color:#cd5555">\n\
+</span></span></span><span style="display:flex;"><span><span style="color:#cd5555"></span><span style="color:#cd5555">Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg</span><span style="color:#cd5555">\n\
+</span></span></span><span style="display:flex;"><span><span style="color:#cd5555">\n\
+</span></span></span><span style="display:flex;"><span><span style="color:#cd5555"></span><span style="color:#cd5555">Types: deb</span><span style="color:#cd5555">\n\
+</span></span></span><span style="display:flex;"><span><span style="color:#cd5555"></span><span style="color:#cd5555">URIs: http://ports.ubuntu.com/ubuntu-ports/</span><span style="color:#cd5555">\n\
+</span></span></span><span style="display:flex;"><span><span style="color:#cd5555"></span><span style="color:#cd5555">Suites: noble-security</span><span style="color:#cd5555">\n\
+</span></span></span><span style="display:flex;"><span><span style="color:#cd5555"></span><span style="color:#cd5555">Components: main restricted universe multiverse</span><span style="color:#cd5555">\n\
+</span></span></span><span style="display:flex;"><span><span style="color:#cd5555"></span><span style="color:#cd5555">Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg&#39;</span> &gt; /etc/apt/sources.list.d/ubuntu.sources &amp;&amp; \
+</span></span><span style="display:flex;"><span>    apt-get update &amp;&amp; \
+</span></span><span style="display:flex;"><span>    apt-get install -q -y --no-install-recommends tzdata &amp;&amp; \
+</span></span><span style="display:flex;"><span>    rm -rf /<span style="color:#8b008b;font-weight:bold">var</span>/lib/apt/lists/*
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="rosdep-改清华源">
+  rosdep 改清华源
+  <a class="anchor" href="#rosdep-%e6%94%b9%e6%b8%85%e5%8d%8e%e6%ba%90">#</a>
+</h4>
+<div class="highlight"><div style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-5-1"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-5-1"> 1</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-5-2"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-5-2"> 2</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-5-3"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-5-3"> 3</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-5-4"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-5-4"> 4</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-5-5"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-5-5"> 5</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-5-6"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-5-6"> 6</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-5-7"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-5-7"> 7</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-5-8"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-5-8"> 8</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-5-9"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-5-9"> 9</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-5-10"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-5-10">10</a>
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-gdscript3" data-lang="gdscript3"><span style="display:flex;"><span><span style="color:#228b22"># # bootstrap rosdep</span>
+</span></span><span style="display:flex;"><span><span style="color:#228b22"># RUN rosdep init \</span>
+</span></span><span style="display:flex;"><span><span style="color:#228b22">#     &amp;&amp; rosdep update</span>
+</span></span><span style="display:flex;"><span><span style="color:#228b22"># According to:</span>
+</span></span><span style="display:flex;"><span><span style="color:#228b22">#    -  https://mirrors.tuna.tsinghua.edu.cn/help/github-raw/</span>
+</span></span><span style="display:flex;"><span><span style="color:#228b22">#    -  https://mirrors.tuna.tsinghua.edu.cn/help/rosdistro/</span>
+</span></span><span style="display:flex;"><span>RUN mkdir -p /etc/ros/rosdep/sources.list.d/ \
+</span></span><span style="display:flex;"><span>    &amp;&amp; curl -o /etc/ros/rosdep/sources.list.d/<span style="color:#b452cd">20</span>-default.list https://mirrors.tuna.tsinghua.edu.cn/github-raw/ros/rosdistro/master/rosdep/sources.list.d/<span style="color:#b452cd">20</span>-default.list \
+</span></span><span style="display:flex;"><span>    &amp;&amp; <span style="color:#8b008b;font-weight:bold">export</span> ROSDISTRO_INDEX_URL=https://mirrors.tuna.tsinghua.edu.cn/rosdistro/index-v4.yaml \
+</span></span><span style="display:flex;"><span>    &amp;&amp; rosdep update
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="最后完整的镜像-docker">
+  最后完整的镜像 Docker
+  <a class="anchor" href="#%e6%9c%80%e5%90%8e%e5%ae%8c%e6%95%b4%e7%9a%84%e9%95%9c%e5%83%8f-docker">#</a>
+</h3>
+<div class="highlight"><div style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-1"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-1">  1</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-2"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-2">  2</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-3"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-3">  3</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-4"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-4">  4</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-5"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-5">  5</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-6"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-6">  6</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-7"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-7">  7</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-8"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-8">  8</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-9"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-9">  9</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-10"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-10"> 10</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-11"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-11"> 11</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-12"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-12"> 12</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-13"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-13"> 13</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-14"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-14"> 14</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-15"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-15"> 15</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-16"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-16"> 16</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-17"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-17"> 17</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-18"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-18"> 18</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-19"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-19"> 19</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-20"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-20"> 20</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-21"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-21"> 21</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-22"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-22"> 22</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-23"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-23"> 23</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-24"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-24"> 24</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-25"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-25"> 25</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-26"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-26"> 26</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-27"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-27"> 27</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-28"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-28"> 28</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-29"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-29"> 29</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-30"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-30"> 30</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-31"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-31"> 31</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-32"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-32"> 32</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-33"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-33"> 33</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-34"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-34"> 34</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-35"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-35"> 35</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-36"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-36"> 36</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-37"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-37"> 37</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-38"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-38"> 38</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-39"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-39"> 39</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-40"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-40"> 40</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-41"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-41"> 41</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-42"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-42"> 42</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-43"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-43"> 43</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-44"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-44"> 44</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-45"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-45"> 45</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-46"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-46"> 46</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-47"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-47"> 47</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-48"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-48"> 48</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-49"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-49"> 49</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-50"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-50"> 50</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-51"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-51"> 51</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-52"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-52"> 52</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-53"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-53"> 53</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-54"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-54"> 54</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-55"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-55"> 55</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-56"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-56"> 56</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-57"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-57"> 57</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-58"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-58"> 58</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-59"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-59"> 59</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-60"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-60"> 60</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-61"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-61"> 61</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-62"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-62"> 62</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-63"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-63"> 63</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-64"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-64"> 64</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-65"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-65"> 65</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-66"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-66"> 66</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-67"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-67"> 67</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-68"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-68"> 68</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-69"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-69"> 69</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-70"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-70"> 70</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-71"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-71"> 71</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-72"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-72"> 72</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-73"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-73"> 73</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-74"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-74"> 74</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-75"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-75"> 75</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-76"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-76"> 76</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-77"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-77"> 77</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-78"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-78"> 78</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-79"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-79"> 79</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-80"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-80"> 80</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-81"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-81"> 81</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-82"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-82"> 82</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-83"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-83"> 83</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-84"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-84"> 84</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-85"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-85"> 85</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-86"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-86"> 86</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-87"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-87"> 87</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-88"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-88"> 88</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-89"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-89"> 89</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-90"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-90"> 90</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-91"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-91"> 91</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-92"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-92"> 92</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-93"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-93"> 93</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-94"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-94"> 94</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-95"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-95"> 95</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-96"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-96"> 96</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-97"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-97"> 97</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-98"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-98"> 98</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-99"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-99"> 99</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-100"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-100">100</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-101"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-101">101</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-102"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-102">102</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-103"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-103">103</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-104"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-104">104</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-105"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-105">105</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-106"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-106">106</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-107"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-107">107</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-108"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-108">108</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-109"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-109">109</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-110"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-110">110</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-111"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-111">111</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-112"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-112">112</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-113"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-113">113</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-114"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-114">114</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-115"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-115">115</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-116"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-116">116</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-117"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-117">117</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-118"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-118">118</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-119"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-119">119</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-120"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-120">120</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-121"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-121">121</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-122"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-122">122</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-123"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-123">123</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-124"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-124">124</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-125"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-125">125</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-126"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-126">126</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-127"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-127">127</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-128"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-128">128</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-129"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-129">129</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-130"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-130">130</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-131"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-131">131</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-132"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-132">132</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-133"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-133">133</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-134"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-134">134</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-135"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-135">135</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-136"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-136">136</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-137"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-137">137</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-138"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-138">138</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-139"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-139">139</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-140"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-140">140</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-141"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-141">141</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-142"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-142">142</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-143"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-143">143</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-144"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-144">144</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-145"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-145">145</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-146"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-146">146</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-147"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-147">147</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-148"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-148">148</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-149"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-149">149</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-150"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-150">150</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-151"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-151">151</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-152"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-152">152</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-153"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-153">153</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-154"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-154">154</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-155"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-155">155</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-156"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-156">156</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-157"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-157">157</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-158"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-158">158</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-159"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-159">159</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-160"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-160">160</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-161"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-161">161</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-6-162"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-6-162">162</a>
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-gdscript3" data-lang="gdscript3"><span style="display:flex;"><span><span style="color:#228b22"># copy from https://github.com/osrf/docker_images/blob/master/ros2/source/devel/Dockerfile</span>
+</span></span><span style="display:flex;"><span>FROM ubuntu:noble-<span style="color:#b452cd">20250127</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#228b22"># First install ca-certificates to handle HTTPS sources</span>
+</span></span><span style="display:flex;"><span>RUN apt-get update &amp;&amp; apt-get install -y ca-certificates &amp;&amp; rm -rf /<span style="color:#8b008b;font-weight:bold">var</span>/lib/apt/lists/*
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#228b22"># setup timezone and change apt source to Tsinghua mirror</span>
+</span></span><span style="display:flex;"><span><span style="color:#228b22"># https://mirrors.tuna.tsinghua.edu.cn/help/ubuntu-ports/</span>
+</span></span><span style="display:flex;"><span>RUN echo <span style="color:#cd5555">&#39;Etc/UTC&#39;</span> &gt; /etc/timezone &amp;&amp; \
+</span></span><span style="display:flex;"><span>    ln -s /usr/share/zoneinfo/Etc/UTC /etc/localtime &amp;&amp; \
+</span></span><span style="display:flex;"><span>    echo <span style="color:#cd5555">&#39;Types: deb</span><span style="color:#cd5555">\n\
+</span></span></span><span style="display:flex;"><span><span style="color:#cd5555"></span><span style="color:#cd5555">URIs: https://mirrors.tuna.tsinghua.edu.cn/ubuntu-ports</span><span style="color:#cd5555">\n\
+</span></span></span><span style="display:flex;"><span><span style="color:#cd5555"></span><span style="color:#cd5555">Suites: noble noble-updates noble-backports</span><span style="color:#cd5555">\n\
+</span></span></span><span style="display:flex;"><span><span style="color:#cd5555"></span><span style="color:#cd5555">Components: main restricted universe multiverse</span><span style="color:#cd5555">\n\
+</span></span></span><span style="display:flex;"><span><span style="color:#cd5555"></span><span style="color:#cd5555">Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg</span><span style="color:#cd5555">\n\
+</span></span></span><span style="display:flex;"><span><span style="color:#cd5555">\n\
+</span></span></span><span style="display:flex;"><span><span style="color:#cd5555"></span><span style="color:#cd5555">Types: deb</span><span style="color:#cd5555">\n\
+</span></span></span><span style="display:flex;"><span><span style="color:#cd5555"></span><span style="color:#cd5555">URIs: http://ports.ubuntu.com/ubuntu-ports/</span><span style="color:#cd5555">\n\
+</span></span></span><span style="display:flex;"><span><span style="color:#cd5555"></span><span style="color:#cd5555">Suites: noble-security</span><span style="color:#cd5555">\n\
+</span></span></span><span style="display:flex;"><span><span style="color:#cd5555"></span><span style="color:#cd5555">Components: main restricted universe multiverse</span><span style="color:#cd5555">\n\
+</span></span></span><span style="display:flex;"><span><span style="color:#cd5555"></span><span style="color:#cd5555">Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg&#39;</span> &gt; /etc/apt/sources.list.d/ubuntu.sources &amp;&amp; \
+</span></span><span style="display:flex;"><span>    apt-get update &amp;&amp; \
+</span></span><span style="display:flex;"><span>    apt-get install -q -y --no-install-recommends tzdata &amp;&amp; \
+</span></span><span style="display:flex;"><span>    rm -rf /<span style="color:#8b008b;font-weight:bold">var</span>/lib/apt/lists/*
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#228b22"># install packages</span>
+</span></span><span style="display:flex;"><span>RUN apt-get update &amp;&amp; apt-get install -q -y --no-install-recommends \
+</span></span><span style="display:flex;"><span>    bash-completion \
+</span></span><span style="display:flex;"><span>    dirmngr \
+</span></span><span style="display:flex;"><span>    gnupg2 \
+</span></span><span style="display:flex;"><span>    python3-argcomplete \
+</span></span><span style="display:flex;"><span>    python3-flake8 \
+</span></span><span style="display:flex;"><span>    python3-flake8-blind-except \
+</span></span><span style="display:flex;"><span>    python3-flake8-builtins \
+</span></span><span style="display:flex;"><span>    python3-flake8-<span style="color:#8b008b;font-weight:bold">class</span>-newline \
+</span></span><span style="display:flex;"><span>    python3-flake8-comprehensions \
+</span></span><span style="display:flex;"><span>    python3-flake8-deprecated \
+</span></span><span style="display:flex;"><span>    python3-flake8-docstrings \
+</span></span><span style="display:flex;"><span>    python3-flake8-import-order \
+</span></span><span style="display:flex;"><span>    python3-flake8-quotes \
+</span></span><span style="display:flex;"><span>    python3-pip \
+</span></span><span style="display:flex;"><span>    python3-pytest-cov \
+</span></span><span style="display:flex;"><span>    python3-pytest-mock \
+</span></span><span style="display:flex;"><span>    python3-pytest-repeat \
+</span></span><span style="display:flex;"><span>    python3-pytest-rerunfailures \
+</span></span><span style="display:flex;"><span>    python3-pytest-runner \
+</span></span><span style="display:flex;"><span>    python3-pytest-timeout \
+</span></span><span style="display:flex;"><span>    curl \
+</span></span><span style="display:flex;"><span>    &amp;&amp; rm -rf /<span style="color:#8b008b;font-weight:bold">var</span>/lib/apt/lists/*
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#228b22"># setup keys</span>
+</span></span><span style="display:flex;"><span>RUN set -eux; \
+</span></span><span style="display:flex;"><span>       key=<span style="color:#cd5555">&#39;C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654&#39;</span>; \
+</span></span><span style="display:flex;"><span>       <span style="color:#8b008b;font-weight:bold">export</span> GNUPGHOME=<span style="color:#cd5555">&#34;$(mktemp -d)&#34;</span>; \
+</span></span><span style="display:flex;"><span>       gpg --batch --keyserver keyserver.ubuntu.com --recv-keys <span style="color:#cd5555">&#34;$key&#34;</span>; \
+</span></span><span style="display:flex;"><span>       mkdir -p /usr/share/keyrings; \
+</span></span><span style="display:flex;"><span>       gpg --batch --<span style="color:#8b008b;font-weight:bold">export</span> <span style="color:#cd5555">&#34;$key&#34;</span> &gt; /usr/share/keyrings/ros2-latest-archive-keyring.gpg; \
+</span></span><span style="display:flex;"><span>       gpgconf --kill all; \
+</span></span><span style="display:flex;"><span>       rm -rf <span style="color:#cd5555">&#34;$GNUPGHOME&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#228b22"># setup sources.list</span>
+</span></span><span style="display:flex;"><span>RUN echo <span style="color:#cd5555">&#34;deb [ signed-by=/usr/share/keyrings/ros2-latest-archive-keyring.gpg ] https://mirrors.tuna.tsinghua.edu.cn/ros2/ubuntu noble main&#34;</span> &gt; /etc/apt/sources.list.d/ros2-latest.list
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#228b22"># setup environment</span>
+</span></span><span style="display:flex;"><span>ENV LANG C.UTF-<span style="color:#b452cd">8</span>
+</span></span><span style="display:flex;"><span>ENV LC_ALL C.UTF-<span style="color:#b452cd">8</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#228b22"># install bootstrap tools</span>
+</span></span><span style="display:flex;"><span>RUN apt-get update &amp;&amp; apt-get install --no-install-recommends -y \
+</span></span><span style="display:flex;"><span>    build-essential \
+</span></span><span style="display:flex;"><span>    git \
+</span></span><span style="display:flex;"><span>    python3-colcon-common-extensions \
+</span></span><span style="display:flex;"><span>    python3-colcon-mixin \
+</span></span><span style="display:flex;"><span>    python3-rosdep \
+</span></span><span style="display:flex;"><span>    python3-setuptools \
+</span></span><span style="display:flex;"><span>    python3-vcstool \
+</span></span><span style="display:flex;"><span>    &amp;&amp; rm -rf /<span style="color:#8b008b;font-weight:bold">var</span>/lib/apt/lists/*
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#228b22"># This is a workaround for pytest not found causing builds to fail</span>
+</span></span><span style="display:flex;"><span><span style="color:#228b22"># Following RUN statements tests for regression of https://github.com/ros2/ros2/issues/722</span>
+</span></span><span style="display:flex;"><span>RUN pip3 freeze | grep pytest \
+</span></span><span style="display:flex;"><span>    &amp;&amp; python3 -m pytest --version
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#228b22"># # bootstrap rosdep</span>
+</span></span><span style="display:flex;"><span><span style="color:#228b22"># RUN rosdep init \</span>
+</span></span><span style="display:flex;"><span><span style="color:#228b22">#     &amp;&amp; rosdep update</span>
+</span></span><span style="display:flex;"><span><span style="color:#228b22"># According to:</span>
+</span></span><span style="display:flex;"><span><span style="color:#228b22">#    -  https://mirrors.tuna.tsinghua.edu.cn/help/github-raw/</span>
+</span></span><span style="display:flex;"><span><span style="color:#228b22">#    -  https://mirrors.tuna.tsinghua.edu.cn/help/rosdistro/</span>
+</span></span><span style="display:flex;"><span>RUN mkdir -p /etc/ros/rosdep/sources.list.d/ \
+</span></span><span style="display:flex;"><span>    &amp;&amp; curl -o /etc/ros/rosdep/sources.list.d/<span style="color:#b452cd">20</span>-default.list https://mirrors.tuna.tsinghua.edu.cn/github-raw/ros/rosdistro/master/rosdep/sources.list.d/<span style="color:#b452cd">20</span>-default.list \
+</span></span><span style="display:flex;"><span>    &amp;&amp; <span style="color:#8b008b;font-weight:bold">export</span> ROSDISTRO_INDEX_URL=https://mirrors.tuna.tsinghua.edu.cn/rosdistro/index-v4.yaml \
+</span></span><span style="display:flex;"><span>    &amp;&amp; rosdep update
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#228b22"># setup colcon mixin and metadata</span>
+</span></span><span style="display:flex;"><span>RUN colcon mixin add default \
+</span></span><span style="display:flex;"><span>      https://raw.githubusercontent.com/colcon/colcon-mixin-repository/master/index.yaml &amp;&amp; \
+</span></span><span style="display:flex;"><span>    colcon mixin update &amp;&amp; \
+</span></span><span style="display:flex;"><span>    colcon metadata add default \
+</span></span><span style="display:flex;"><span>      https://raw.githubusercontent.com/colcon/colcon-metadata-repository/master/index.yaml &amp;&amp; \
+</span></span><span style="display:flex;"><span>    colcon metadata update
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#228b22"># setup pip mirror</span>
+</span></span><span style="display:flex;"><span>RUN pip3 config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#228b22"># clone source</span>
+</span></span><span style="display:flex;"><span>ENV ROS2_WS /opt/ros2_ws
+</span></span><span style="display:flex;"><span>RUN mkdir -p $ROS2_WS/src
+</span></span><span style="display:flex;"><span>WORKDIR $ROS2_WS
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#228b22"># build source</span>
+</span></span><span style="display:flex;"><span>RUN colcon \
+</span></span><span style="display:flex;"><span>    build \
+</span></span><span style="display:flex;"><span>    --cmake-args \
+</span></span><span style="display:flex;"><span>      -DSECURITY=ON --no-warn-unused-cli \
+</span></span><span style="display:flex;"><span>    --symlink-install
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#228b22"># set environment</span>
+</span></span><span style="display:flex;"><span>ARG ROS_DISTRO=rolling
+</span></span><span style="display:flex;"><span>ENV ROS_DISTRO=$ROS_DISTRO
+</span></span><span style="display:flex;"><span>ENV ROS_VERSION=<span style="color:#b452cd">2</span> \
+</span></span><span style="display:flex;"><span>    ROS_PYTHON_VERSION=<span style="color:#b452cd">3</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#228b22"># clone source</span>
+</span></span><span style="display:flex;"><span>ARG ROS2_BRANCH=$ROS_DISTRO
+</span></span><span style="display:flex;"><span>ARG ROS2_REPO=https://github.com/ros2/ros2.git
+</span></span><span style="display:flex;"><span>RUN git clone $ROS2_REPO -b $ROS2_BRANCH \
+</span></span><span style="display:flex;"><span>    &amp;&amp; vcs import src &lt; ros2/ros2.repos
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#228b22"># setup rosdep source</span>
+</span></span><span style="display:flex;"><span>RUN mkdir -p /etc/ros/rosdep/sources.list.d/ &amp;&amp; \
+</span></span><span style="display:flex;"><span>echo <span style="color:#cd5555">&#34;yaml https://mirrors.tuna.tsinghua.edu.cn/rosdistro/rosdep/base.yaml&#34;</span> &gt; /etc/ros/rosdep/sources.list.d/<span style="color:#b452cd">20</span>-default.list &amp;&amp; \
+</span></span><span style="display:flex;"><span>echo <span style="color:#cd5555">&#34;yaml https://mirrors.tuna.tsinghua.edu.cn/rosdistro/rosdep/python.yaml&#34;</span> &gt;&gt; /etc/ros/rosdep/sources.list.d/<span style="color:#b452cd">20</span>-default.list &amp;&amp; \
+</span></span><span style="display:flex;"><span>echo <span style="color:#cd5555">&#34;yaml https://mirrors.tuna.tsinghua.edu.cn/rosdistro/rosdep/osx-homebrew.yaml&#34;</span> &gt;&gt; /etc/ros/rosdep/sources.list.d/<span style="color:#b452cd">20</span>-default.list
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#228b22"># install dependencies</span>
+</span></span><span style="display:flex;"><span>RUN apt-get update &amp;&amp; rosdep install -y \
+</span></span><span style="display:flex;"><span>    --from-paths src \
+</span></span><span style="display:flex;"><span>    --ignore-src \
+</span></span><span style="display:flex;"><span>    --skip-keys <span style="color:#cd5555">&#34; </span><span style="color:#cd5555">\
+</span></span></span><span style="display:flex;"><span><span style="color:#cd5555"></span><span style="color:#cd5555">        fastcdr </span><span style="color:#cd5555">\
+</span></span></span><span style="display:flex;"><span><span style="color:#cd5555"></span><span style="color:#cd5555">        rti-connext-dds-6.0.1 </span><span style="color:#cd5555">\
+</span></span></span><span style="display:flex;"><span><span style="color:#cd5555"></span><span style="color:#cd5555">        urdfdom_headers&#34;</span> \
+</span></span><span style="display:flex;"><span>    &amp;&amp; rm -rf /<span style="color:#8b008b;font-weight:bold">var</span>/lib/apt/lists/*
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#228b22"># # build source</span>
+</span></span><span style="display:flex;"><span>RUN colcon \
+</span></span><span style="display:flex;"><span>    build \
+</span></span><span style="display:flex;"><span>    --symlink-install \
+</span></span><span style="display:flex;"><span>    --mixin build-testing-on release \
+</span></span><span style="display:flex;"><span>    --cmake-args --no-warn-unused-cli
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#228b22"># setup bashrc</span>
+</span></span><span style="display:flex;"><span>RUN cp /etc/skel/.bashrc ~/
+</span></span><span style="display:flex;"><span>RUN echo <span style="color:#cd5555">&#39;export ROSDISTRO_INDEX_URL=https://mirrors.tuna.tsinghua.edu.cn/rosdistro/index-v4.yaml&#39;</span> &gt;&gt; ~/.bashrc
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#228b22"># setup entrypoint</span>
+</span></span><span style="display:flex;"><span>COPY ./ros_entrypoint.sh /
+</span></span><span style="display:flex;"><span>RUN chmod +x /ros_entrypoint.sh
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>ENTRYPOINT [<span style="color:#cd5555">&#34;/ros_entrypoint.sh&#34;</span>]
+</span></span><span style="display:flex;"><span>CMD [<span style="color:#cd5555">&#34;bash&#34;</span>]
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="build-docker--run">
+  build docker &amp; run
+  <a class="anchor" href="#build-docker--run">#</a>
+</h2>
+<div class="highlight"><div style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-7-1"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-7-1">1</a>
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-fallback" data-lang="fallback"><span style="display:flex;"><span>docker build -t ros2:rolling-noble . 
+</span></span></code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-8-1"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-8-1"> 1</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-8-2"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-8-2"> 2</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-8-3"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-8-3"> 3</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-8-4"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-8-4"> 4</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-8-5"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-8-5"> 5</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-8-6"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-8-6"> 6</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-8-7"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-8-7"> 7</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-8-8"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-8-8"> 8</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-8-9"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-8-9"> 9</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-8-10"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-8-10">10</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-8-11"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-8-11">11</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-8-12"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-8-12">12</a>
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-fallback" data-lang="fallback"><span style="display:flex;"><span>docker run -it -v ~/workspace/ros2-ws/workspace/:/opt/ros2_ws \
+</span></span><span style="display:flex;"><span>    --name ros2_rolling \
+</span></span><span style="display:flex;"><span>    --network=host \
+</span></span><span style="display:flex;"><span>    --privileged \
+</span></span><span style="display:flex;"><span>    -e DISPLAY=$DISPLAY \
+</span></span><span style="display:flex;"><span>    -e QT_X11_NO_MITSHM=1 \
+</span></span><span style="display:flex;"><span>    -v /tmp/.X11-unix:/tmp/.X11-unix:rw \
+</span></span><span style="display:flex;"><span>    --cap-add=SYS_PTRACE \
+</span></span><span style="display:flex;"><span>    --ulimit rtprio=99 \
+</span></span><span style="display:flex;"><span>    --ulimit rttime=-1 \
+</span></span><span style="display:flex;"><span>    --ulimit memlock=-1 \
+</span></span><span style="display:flex;"><span>    ros2:rolling-noble
+</span></span></code></pre></td></tr></table>
+</div>
+</div></article>
+ 
+      
+
+      <footer class="book-footer">
+        
+  <div class="flex flex-wrap justify-between">
+
+
+
+
+
+</div>
+
+
+
+  <script>(function(){function e(e){const t=window.getSelection(),n=document.createRange();n.selectNodeContents(e),t.removeAllRanges(),t.addRange(n)}document.querySelectorAll("pre code").forEach(t=>{t.addEventListener("click",function(){if(window.getSelection().toString())return;e(t.parentElement),navigator.clipboard&&navigator.clipboard.writeText(t.parentElement.textContent)})})})()</script>
+
+
+ 
+        
+      </footer>
+
+      
+  
+  <div class="book-comments">
+
+<div class="book-tabs-content markdown-inner">
+    <div id="tcomment"></div>
+        <script src="https://cdn.jsdelivr.net/npm/twikoo@1.6.39/dist/twikoo.all.min.js"></script>
+        <script>
+            twikoo.init({
+            envId: 'https://scintillating-clafoutis-b4552c.netlify.app/.netlify/functions/twikoo',
+            el: '#tcomment', 
+            
+            
+            lang: 'zh-CN', 
+            })
+        </script>
+    </div>
+</div></div>
+  
+ 
+
+      <label for="menu-control" class="hidden book-menu-overlay"></label>
+    </div>
+
+    
+    <aside class="book-toc">
+      <div class="book-toc-content">
+        
+  
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#repo-拉取代码">repo 拉取代码</a>
+      <ul>
+        <li><a href="#repo-改用清华源">repo 改用清华源</a></li>
+        <li><a href="#拉取代码">拉取代码</a></li>
+      </ul>
+    </li>
+    <li><a href="#准备开发-docker">准备开发 docker</a>
+      <ul>
+        <li><a href="#改清华源">改清华源</a></li>
+        <li><a href="#最后完整的镜像-docker">最后完整的镜像 Docker</a></li>
+      </ul>
+    </li>
+    <li><a href="#build-docker--run">build docker &amp; run</a></li>
+  </ul>
+</nav>
+
+
+ 
+      </div>
+    </aside>
+    
+  </main>
+
+  
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
