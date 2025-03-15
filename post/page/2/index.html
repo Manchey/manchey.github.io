@@ -17,7 +17,7 @@
 <link rel="canonical" href="https://manchey.github.io/post/">
 <link rel="stylesheet" href="https://manchey.github.io/book.min.2d11051f9bbf9eb3c1e80b2b7a60b21379d1b88bdcc5a0c2b268ec9357d72f50.css" integrity="sha256-LREFH5u/nrPB6AsremCyE3nRuIvcxaDCsmjsk1fXL1A=" crossorigin="anonymous">
   <script defer src="https://manchey.github.io/fuse.min.js"></script>
-  <script defer src="https://manchey.github.io/en.search.min.fa403e6f38f758cd7e6a0b6104fbda0c17d2d15ad162232fb7aa4e8719cd1c87.js" integrity="sha256-&#43;kA&#43;bzj3WM1&#43;agthBPvaDBfS0VrRYiMvt6pOhxnNHIc=" crossorigin="anonymous"></script>
+  <script defer src="https://manchey.github.io/en.search.min.e0511741095ad4e5835bfc181f9fad42234434f343f6c0ed13cd743257bdec01.js" integrity="sha256-4FEXQQla1OWDW/wYH5&#43;tQiNENPND9sDtE810Mle97AE=" crossorigin="anonymous"></script>
 
       <script async src="https://www.googletagmanager.com/gtag/js?id=G-4T451VBM9P"></script>
       <script>
@@ -200,6 +200,177 @@ https://github.com/alex-shpak/hugo-book
   
   <article class="markdown book-post">
     <h2>
+      <a href="https://manchey.github.io/posts/2025/01/mutexcv%E6%80%A7%E8%83%BD%E6%B5%8B%E8%AF%95/">mutex&amp;cv性能测试</a>
+    </h2>
+    
+  <div class="flex align-center text-small book-post-date">
+    <img src="https://manchey.github.io/svg/calendar.svg" class="book-icon " alt="" />
+    <span>January 15, 2025</span>
+  </div>
+
+
+
+  
+
+  
+
+
+    <div class="book-post-content"><h1 id="mutexcv性能测试">
+  mutex&amp;cv性能测试
+  <a class="anchor" href="#mutexcv%e6%80%a7%e8%83%bd%e6%b5%8b%e8%af%95">#</a>
+</h1>
+<h2 id="参考">
+  参考
+  <a class="anchor" href="#%e5%8f%82%e8%80%83">#</a>
+</h2>
+<ul>
+<li>condition_variable 性能测试：
+<ul>
+<li>参考：<a href="https://www.modernescpp.com/index.php/performancecomparison-of-condition-variables-and-atomics-in-c-20/">https://www.modernescpp.com/index.php/performancecomparison-of-condition-variables-and-atomics-in-c-20/</a></li>
+<li>两个线程，ping-pong 互相通知，测试单位时间内的 ping-pong 次数。</li>
+<li>测试结果：和 std::condition_variable 性能基本一致</li>
+</ul>
+</li>
+<li>mutex 性能测试：
+<ul>
+<li>参考：<a href="https://chromium.googlesource.com/external/github.com/abseil/abseil-cpp/&#43;/HEAD/absl/synchronization/mutex_benchmark.cc">https://chromium.googlesource.com/external/github.com/abseil/abseil-cpp/+/HEAD/absl/synchronization/mutex_benchmark.cc</a></li>
+<li>测试场景：
+<ol>
+<li>N 个线程，分别 lock、unlock</li>
+<li>N 个线程，分别先做一些操作、然后 lock、做一些操作、再 unlock</li>
+</ol>
+</li>
+<li>测试结果：使能优先级继承后，多线程竞争情况下，lock/unlock 性能降低一个数量级左右</li>
+<li>备注：也测试了在现有实现下，仅注释掉使能优先级继承的代码，性能恢复到和 std::mutex 一个量级，说明性能下降非代码实现原因，而是优先级继承机制导致。</li>
+</ul>
+</li>
+</ul>
+<h2 id="代码">
+  代码
+  <a class="anchor" href="#%e4%bb%a3%e7%a0%81">#</a>
+</h2>
+<div class="highlight"><div style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-0-1"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-0-1"> 1</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-0-2"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-0-2"> 2</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-0-3"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-0-3"> 3</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-0-4"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-0-4"> 4</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-0-5"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-0-5"> 5</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-0-6"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-0-6"> 6</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-0-7"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-0-7"> 7</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-0-8"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-0-8"> 8</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-0-9"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-0-9"> 9</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-0-10"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-0-10">10</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-0-11"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-0-11">11</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-0-12"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-0-12">12</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-0-13"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-0-13">13</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-0-14"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-0-14">14</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-0-15"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-0-15">15</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-0-16"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-0-16">16</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-0-17"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-0-17">17</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-0-18"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-0-18">18</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-0-19"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-0-19">19</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-0-20"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-0-20">20</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-0-21"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-0-21">21</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-0-22"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-0-22">22</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-0-23"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-0-23">23</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-0-24"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-0-24">24</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-0-25"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-0-25">25</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-0-26"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-0-26">26</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-0-27"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-0-27">27</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-0-28"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-0-28">28</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-0-29"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-0-29">29</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-0-30"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-0-30">30</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-0-31"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-0-31">31</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-0-32"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-0-32">32</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-0-33"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-0-33">33</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-0-34"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-0-34">34</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-0-35"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-0-35">35</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-0-36"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-0-36">36</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-0-37"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-0-37">37</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-0-38"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-0-38">38</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-0-39"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-0-39">39</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-0-40"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-0-40">40</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-0-41"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-0-41">41</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-0-42"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-0-42">42</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-0-43"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-0-43">43</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-0-44"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-0-44">44</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-0-45"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-0-45">45</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-0-46"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-0-46">46</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-0-47"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-0-47">47</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-0-48"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-0-48">48</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-0-49"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-0-49">49</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-0-50"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-0-50">50</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-0-51"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-0-51">51</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-0-52"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-0-52">52</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-0-53"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-0-53">53</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-0-54"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-0-54">54</a>
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-0-55"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-0-55">55</a>
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#1e889b">#include</span> <span style="color:#1e889b">&lt;condition_variable&gt;</span><span style="color:#1e889b">
+</span></span></span><span style="display:flex;"><span><span style="color:#1e889b">#include</span> <span style="color:#1e889b">&lt;mutex&gt;</span><span style="color:#1e889b">
+</span></span></span><span style="display:flex;"><span><span style="color:#1e889b">#include</span> <span style="color:#1e889b">&lt;thread&gt;</span><span style="color:#1e889b">
+</span></span></span><span style="display:flex;"><span><span style="color:#1e889b"></span>
+</span></span><span style="display:flex;"><span><span style="color:#1e889b">#include</span> <span style="color:#1e889b">&lt;benchmark/benchmark.h&gt;</span><span style="color:#1e889b">
+</span></span></span><span style="display:flex;"><span><span style="color:#1e889b"></span>
+</span></span><span style="display:flex;"><span><span style="color:#1e889b">#include</span> <span style="color:#1e889b">&#34;base/synchronization/condition_variable.h&#34;</span><span style="color:#1e889b">
+</span></span></span><span style="display:flex;"><span><span style="color:#1e889b"></span>
+</span></span><span style="display:flex;"><span><span style="color:#8b008b;font-weight:bold">using</span> <span style="color:#8b008b;font-weight:bold">namespace</span> deeproute::base;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#8b008b;font-weight:bold">template</span> &lt;<span style="color:#8b008b;font-weight:bold">typename</span> ConditionVariableType&gt;
+</span></span><span style="display:flex;"><span><span style="color:#8b008b;font-weight:bold">static</span> <span style="color:#00688b;font-weight:bold">void</span> BM_PingPong(benchmark::State&amp; state) {
+</span></span><span style="display:flex;"><span>  ConditionVariableType cv1, cv2;
+</span></span><span style="display:flex;"><span>  std::mutex mutex;
+</span></span><span style="display:flex;"><span>  <span style="color:#00688b;font-weight:bold">bool</span> data_ready = <span style="color:#658b00">false</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#00688b;font-weight:bold">bool</span> should_exit = <span style="color:#658b00">false</span>;
+</span></span><span style="display:flex;"><span>  size_t counter = <span style="color:#b452cd">0</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#8b008b;font-weight:bold">const</span> size_t iterations_per_test = <span style="color:#b452cd">10000</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  std::<span style="color:#8b008b;font-weight:bold">thread</span> pong([&amp;]() {
+</span></span><span style="display:flex;"><span>    <span style="color:#8b008b;font-weight:bold">while</span> (!should_exit) {
+</span></span><span style="display:flex;"><span>      std::unique_lock&lt;std::mutex&gt; lock(mutex);
+</span></span><span style="display:flex;"><span>      cv2.wait(lock, [&amp;]() { <span style="color:#8b008b;font-weight:bold">return</span> data_ready || should_exit; });
+</span></span><span style="display:flex;"><span>      <span style="color:#8b008b;font-weight:bold">if</span> (should_exit) <span style="color:#8b008b;font-weight:bold">break</span>;
+</span></span><span style="display:flex;"><span>      data_ready = <span style="color:#658b00">false</span>;
+</span></span><span style="display:flex;"><span>      cv1.notify_one();
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>  });
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#8b008b;font-weight:bold">for</span> (<span style="color:#8b008b;font-weight:bold">auto</span> _ : state) {
+</span></span><span style="display:flex;"><span>    counter = <span style="color:#b452cd">0</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#8b008b;font-weight:bold">while</span> (counter &lt; iterations_per_test) {
+</span></span><span style="display:flex;"><span>      std::unique_lock&lt;std::mutex&gt; lock(mutex);
+</span></span><span style="display:flex;"><span>      cv1.wait(lock, [&amp;]() { <span style="color:#8b008b;font-weight:bold">return</span> !data_ready; });
+</span></span><span style="display:flex;"><span>      data_ready = <span style="color:#658b00">true</span>;
+</span></span><span style="display:flex;"><span>      counter++;
+</span></span><span style="display:flex;"><span>      cv2.notify_one();
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  {
+</span></span><span style="display:flex;"><span>    std::lock_guard&lt;std::mutex&gt; lock(mutex);
+</span></span><span style="display:flex;"><span>    should_exit = <span style="color:#658b00">true</span>;
+</span></span><span style="display:flex;"><span>    data_ready = <span style="color:#658b00">true</span>;
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>  cv2.notify_one();
+</span></span><span style="display:flex;"><span>  pong.join();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  state.SetItemsProcessed(state.iterations() * iterations_per_test);
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>BENCHMARK_TEMPLATE(BM_PingPong, std::condition_variable);
+</span></span><span style="display:flex;"><span>BENCHMARK_TEMPLATE(BM_PingPong, ConditionVariable);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>BENCHMARK_MAIN();
+</span></span></code></pre></td></tr></table>
+</div>
+</div>
+    </div>
+  </article>
+  
+  <article class="markdown book-post">
+    <h2>
       <a href="https://manchey.github.io/posts/2025/01/vim%E6%A0%B9%E6%8D%AE%E6%A8%A1%E5%BC%8F%E5%88%87%E6%8D%A2%E8%BE%93%E5%85%A5%E6%B3%95/">vim根据模式切换输入法</a>
     </h2>
     
@@ -268,85 +439,6 @@ https://github.com/alex-shpak/hugo-book
 </span></span></code></pre></td></tr></table>
 </div>
 </div>
-    </div>
-  </article>
-  
-  <article class="markdown book-post">
-    <h2>
-      <a href="https://manchey.github.io/posts/2024/12/ubuntu20.04%E6%BA%90%E7%A0%81%E7%BC%96%E8%AF%91cyber-rt-10.0.0/">ubuntu20.04源码编译cyber rt 10.0.0</a>
-    </h2>
-    
-  <div class="flex align-center text-small book-post-date">
-    <img src="https://manchey.github.io/svg/calendar.svg" class="book-icon " alt="" />
-    <span>December 26, 2024</span>
-  </div>
-
-
-
-  
-
-  
-
-
-    <div class="book-post-content"><h1 id="ubuntu2004源码编译cyber-rt-1000">
-  ubuntu20.04源码编译cyber rt 10.0.0
-  <a class="anchor" href="#ubuntu2004%e6%ba%90%e7%a0%81%e7%bc%96%e8%af%91cyber-rt-1000">#</a>
-</h1>
-<h2 id="安装-fastdds">
-  安装 fastdds
-  <a class="anchor" href="#%e5%ae%89%e8%a3%85-fastdds">#</a>
-</h2>
-<p>apollo 给的环境是一个 docker。third_party 里 fastdds 的 bazel build 直接通过系统路径依赖的 fastdds。</p>
-<p>自己的环境中没有，手动安装一下，看文档是说 10.0.0 升级到了 2.x 版本。</p>
-<p>参考 fastdds 官网文档安装一下。</p>
-<p><a href="https://fast-dds.docs.eprosima.com/en/latest/installation/binaries/binaries_linux.html">https://fast-dds.docs.eprosima.com/en/latest/installation/binaries/binaries_linux.html</a></p>
-<p>二进制版本，下载解压，<code>sudo install.sh</code></p>
-<ul>
-<li>装不上 python3-xmlschema
-<ul>
-<li>换成 <code>pip3 install xmlschema</code>，然后注释掉脚本里的 python3-xmlschema</li>
-</ul>
-</li>
-<li>clone foonathan_memory_vendor 报错；手动进入到该文件夹后 build 通过</li>
-<li>cmake 版本不匹配，要求最低 3.20，但是自带的是 3.16。升级麻烦，直接替换了。按照经验大部分人都是随便写个版本，实际根本没用到什么新功能。</li>
-</ul>
-<p>编译通过</p>
-<h2 id="cyber-rt">
-  cyber rt
-  <a class="anchor" href="#cyber-rt">#</a>
-</h2>
-<p>把 third_party 里的 fastdds/uuid 依赖加上。</p>
-<p>还缺 bvar。</p>
-<h3 id="安装-bvar">
-  安装 bvar
-  <a class="anchor" href="#%e5%ae%89%e8%a3%85-bvar">#</a>
-</h3>
-<p>install_pkg_repo.sh 脚本里安装的。</p>
-<div class="highlight"><div style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
-<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-0-1"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-0-1">1</a>
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-0-2"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-0-2">2</a>
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-0-3"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-0-3">3</a>
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-0-4"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-0-4">4</a>
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-0-5"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-0-5">5</a>
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-0-6"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-0-6">6</a>
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-0-7"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-0-7">7</a>
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f" id="hl-0-8"><a style="outline:none;text-decoration:none;color:inherit" href="#hl-0-8">8</a>
-</span></code></pre></td>
-<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#eed;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-gdscript3" data-lang="gdscript3"><span style="display:flex;"><span><span style="color:#228b22"># 添加 Apollo 的 GPG 密钥</span>
-</span></span><span style="display:flex;"><span>curl -fsSL https://apollo-pkg-beta.cdn.bcebos.com/neo/beta/key/deb.gpg.key | sudo gpg --dearmor -o /etc/apt/keyrings/apolloauto.gpg
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#228b22"># 添加 Apollo 的软件源</span>
-</span></span><span style="display:flex;"><span>echo <span style="color:#cd5555">&#34;deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/apolloauto.gpg] https://apollo-pkg-beta.cdn.bcebos.com/apollo/core $(. /etc/os-release &amp;&amp; echo &#34;</span>$VERSION_CODENAME<span style="color:#cd5555">&#34;) main&#34;</span> | sudo tee /etc/apt/sources.list.d/apolloauto.list
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>sudo apt update
-</span></span><span style="display:flex;"><span>sudo apt-get install bvar
-</span></span></code></pre></td></tr></table>
-</div>
-</div><p>装不上，有人提 issue：</p>
-        <a href="https://manchey.github.io/posts/2024/12/ubuntu20.04%E6%BA%90%E7%A0%81%E7%BC%96%E8%AF%91cyber-rt-10.0.0/">...</a>
-      
     </div>
   </article>
   
